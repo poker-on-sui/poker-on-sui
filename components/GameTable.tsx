@@ -5,14 +5,17 @@ import Image from 'next/image'
 import GameControls from './GameControls'
 import OnTableStatus from './OnTableStatus'
 import tablePng from '~/assets/table.png'
-import { useGameTable } from '~/lib/hooks/useGameTable'
+import { waitingForPlayersTwoPlayers } from '~/lib/mock/game-state.mock'
+// import { useGameTable } from '~/lib/hooks/useGameTable'
 
 interface Props {
   readonly gameAddress?: string
 }
 
-export default function GameTable({ gameAddress }: Props) {
-  const { game, isLoading } = useGameTable(gameAddress)
+export default function GameTable({  }: Props) {
+  // const { game, isLoading } = useGameTable(gameAddress)
+  const game = waitingForPlayersTwoPlayers
+  const isLoading = false // Simulating loading state for the example
 
   return (
     <div className='h-full w-full relative'>

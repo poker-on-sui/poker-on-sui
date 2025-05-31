@@ -44,6 +44,8 @@ export const dictionaries = {
       otherPlayer: 'other player',
       yourTurn: 'Your turn -',
       round: 'Round',
+      playersJoined: 'players joined',
+      startGame: 'Start Game',
       actions: {
         fold: 'Fold',
         check: 'Check',

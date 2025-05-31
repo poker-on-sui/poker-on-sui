@@ -1,5 +1,7 @@
 'use client'
 import React from 'react'
+import { Button } from '~/components/ui/button'
+import { useGameActions } from '~/lib/hooks/useGameActions'
 import { en } from '~/lib/dictionaries'
 import { GameState } from '~/lib/models/GameState'
 import { PokerGameState } from '~/lib/models/MovePokerGameSchema'
@@ -65,6 +67,8 @@ function getPhaseStyles(status: PokerGameState) {
 }
 
 export default function OnTableStatus({ game, loading }: Props) {
+  const actions = useGameActions(game?.id)
+
   if (loading) {
     return (
       <div className='flex items-center justify-center p-8'>
@@ -88,11 +92,17 @@ export default function OnTableStatus({ game, loading }: Props) {
 
   const currentPlayer = game.players[game.currentPlayer]
   const isMyTurn = currentPlayer?.isActive && !currentPlayer?.isFolded
+  const isWaitingForPlayers =
+    game.status === PokerGameState.WAITING_FOR_PLAYERS &&
+    game.players.length < 2
+  const canStart =
+    game.status === PokerGameState.WAITING_FOR_PLAYERS &&
+    game.players.length >= 2
 
   return (
     <div className='space-y-4'>
       {/* Game Info */}
-      {game.status !== PokerGameState.WAITING_FOR_PLAYERS && (
+      {isWaitingForPlayers && (
         <div className='flex justify-between items-center text-white'>
           <div className='text-sm'>
             <span className='text-gray-400'>{en.game.pot}</span>{' '}
@@ -109,6 +119,22 @@ export default function OnTableStatus({ game, loading }: Props) {
             <span className='font-bold text-blue-400'>
               ${currentPlayer?.chips || 0}
             </span>
+          </div>
+        </div>
+      )}
+
+      {/* Able to start Game UI */}
+      {canStart && (
+        <div className='text-center space-y-4'>
+          <Button
+            onClick={() => actions.startGame()}
+            disabled={actions.isLoading}
+            className='bg-gradient-to-r from-green-500 to-emerald-700 text-white text-lg font-bold px-8 py-3 rounded-lg shadow-lg hover:from-green-400 hover:to-emerald-600 transition-all duration-200 disabled:opacity-50'
+          >
+            {actions.isLoading ? en.game.status.starting : en.game.startGame}
+          </Button>
+          <div className='text-xs text-gray-400'>
+            {game.players.length} {en.game.playersJoined}
           </div>
         </div>
       )}
