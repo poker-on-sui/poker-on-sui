@@ -8,7 +8,7 @@ import GameControls from './GameControls'
 import OnTableStatus from './OnTableStatus'
 
 interface Props {
-  readonly gameAddress: string
+  readonly gameAddress?: string
 }
 
 export default function GameTable({ gameAddress }: Props) {

@@ -135,7 +135,7 @@ const mockGame: GameState = {
   maxPlayers: 8,
 }
 
-export function useGame(addr: string) {
+export function useGame(addr?: string) {
   const [game, setGame] = useState<GameState | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

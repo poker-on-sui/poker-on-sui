@@ -3,16 +3,33 @@ import React from 'react'
 import { useGame } from '~/lib/hooks/useGame'
 
 interface Props {
-  readonly gameAddress: string
+  readonly gameAddress?: string
 }
 
 export default function OnTableStatus({ gameAddress }: Props) {
   const { game, loading } = useGame(gameAddress)
 
+  if (!gameAddress) {
+    return (
+      <div className='bg-black/80 backdrop-blur-sm border border-white/20 rounded-lg p-4 shadow-2xl'>
+        <div className='flex items-center justify-center p-8'>
+          <div className='text-center'>
+            <div className='text-white text-lg mb-2'>No Game Loaded</div>
+            <div className='text-gray-400 text-sm'>
+              Join or create a game to see the table status
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   if (loading || !game) {
     return (
-      <div className='flex items-center justify-center p-4'>
-        <div className='text-white'>Loading game status...</div>
+      <div className='bg-black/80 backdrop-blur-sm border border-white/20 rounded-lg p-4 shadow-2xl'>
+        <div className='flex items-center justify-center p-8'>
+          <div className='text-white'>Loading game status...</div>
+        </div>
       </div>
     )
   }

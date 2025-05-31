@@ -5,7 +5,7 @@ import { Input } from '~/components/ui/input'
 import { useGame } from '~/lib/hooks/useGame'
 
 interface Props {
-  readonly gameAddress: string
+  readonly gameAddress?: string
 }
 
 export default function GameControls({ gameAddress }: Props) {
@@ -13,10 +13,26 @@ export default function GameControls({ gameAddress }: Props) {
   const [raiseAmount, setRaiseAmount] = useState(0)
   const [customBetAmount, setCustomBetAmount] = useState('')
 
+  // Show "no game loaded" state when gameAddress is empty or undefined
+  if (!gameAddress) {
+    return (
+      <div className='bg-black/80 backdrop-blur-sm border border-white/20 rounded-lg p-6 shadow-2xl'>
+        <div className='flex items-center justify-center'>
+          <div className='text-center text-gray-400'>
+            <div className='text-lg font-medium mb-2'>No Game Loaded</div>
+            <div className='text-sm'>Join or create a game to see controls</div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   if (loading || !game) {
     return (
-      <div className='flex items-center justify-center p-4'>
-        <div className='text-white'>Loading game controls...</div>
+      <div className='bg-black/80 backdrop-blur-sm border border-white/20 rounded-lg p-6 shadow-2xl'>
+        <div className='flex items-center justify-center'>
+          <div className='text-white'>Loading game controls...</div>
+        </div>
       </div>
     )
   }
