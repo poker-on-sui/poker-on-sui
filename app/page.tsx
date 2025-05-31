@@ -1,5 +1,6 @@
 'use client'
 import React, { useState } from 'react'
+import Image from 'next/image'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import {
@@ -83,9 +84,30 @@ export default function Home() {
 
       {/* Main content */}
       <div className='flex flex-1 flex-col items-center justify-center'>
-        <h1 className='text-4xl font-extrabold mb-8 bg-gradient-to-r from-cyan-300 via-blue-400 to-purple-500 bg-clip-text text-transparent drop-shadow-glow'>
-          Welcome to Texas Hold&#39;em Poker
+        {/* Hero Image */}
+
+        <Image
+          src='/icon.png'
+          alt='Poker on SUI'
+          width={400}
+          height={400}
+          className='drop-shadow-2xl'
+          priority
+        />
+        <h1 className='text-4xl font-extrabold bg-gradient-to-r from-cyan-300 via-blue-400 to-purple-500 bg-clip-text text-transparent drop-shadow-glow'>
+          A Poker Game
         </h1>
+        <div className='mb-8 flex items-center justify-center opacity-80'>
+          <span className='text-white italic'>All-in-</span>
+          <Image
+            src='/Sui_Symbol_White.svg'
+            alt='SUI'
+            width={12}
+            height={12}
+            unoptimized
+            className='opacity-80'
+          />
+        </div>
         <div className='flex flex-col gap-6 w-full max-w-xs'>
           <Button className='w-full py-3 bg-gradient-to-r from-green-500 to-emerald-700 text-white rounded-lg text-xl font-bold shadow-lg hover:from-green-400 hover:to-emerald-600 transition drop-shadow-glow'>
             Host
