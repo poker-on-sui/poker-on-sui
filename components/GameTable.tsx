@@ -1,11 +1,11 @@
 'use client'
 import React from 'react'
 import Image from 'next/image'
-import tablePng from '~/assets/table.png'
 
 import { useGame } from '~/lib/hooks/useGame'
 import GameControls from './GameControls'
 import OnTableStatus from './OnTableStatus'
+import tablePng from '~/assets/table.png'
 
 interface Props {
   readonly gameAddress?: string

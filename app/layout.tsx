@@ -1,6 +1,9 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
+
+import '@mysten/dapp-kit/dist/index.css'
 import './globals.css'
+
 import { en } from '~/lib/dictionaries'
 import { AppLayout } from '~/components/AppLayout'
 
