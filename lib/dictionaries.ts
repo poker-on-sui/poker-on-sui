@@ -44,6 +44,20 @@ export const dictionaries = {
       otherPlayer: 'other player',
       yourTurn: 'Your turn -',
       round: 'Round',
+      actions: {
+        fold: 'Fold',
+        check: 'Check',
+        call: 'Call',
+        bet: 'Bet',
+        raise: 'Raise',
+        allIn: 'All In',
+      },
+      status: {
+        creating: 'Creating game...',
+        joining: 'Joining game...',
+        starting: 'Starting game...',
+        processing: 'Processing action...',
+      },
     },
 
     // Game rules dialog
@@ -74,6 +88,16 @@ export const dictionaries = {
       invalidGameAddress: 'Invalid game address format',
       gameNotFound: 'Game not found or has ended',
       connectionError: 'Connection error. Please try again later.',
+      transactionFailed: 'Transaction failed',
+      createGameFailed: 'Failed to create game',
+      joinGameFailed: 'Failed to join game',
+      startGameFailed: 'Failed to start game',
+      actionFailed: 'Failed to execute action',
+      insufficientFunds: 'Insufficient funds',
+      notYourTurn: 'Not your turn',
+      invalidAction: 'Invalid action',
+      gameInProgress: 'Game is already in progress',
+      walletNotConnected: 'Please connect your wallet',
     },
   },
 } as const

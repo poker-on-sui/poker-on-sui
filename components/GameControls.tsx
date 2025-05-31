@@ -2,19 +2,20 @@
 import React, { useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
-import { useMockGame } from '~/lib/hooks/useMockGame'
+import { useGameActions } from '~/lib/hooks/useGameActions'
+import { GameState } from '~/lib/models/GameState'
 
 interface Props {
-  readonly gameAddress?: string
+  readonly game?: GameState
 }
 
-export default function GameControls({ gameAddress }: Props) {
-  const { game, loading, actions } = useMockGame(gameAddress)
+export default function GameControls({ game }: Props) {
   const [raiseAmount, setRaiseAmount] = useState(0)
   const [customBetAmount, setCustomBetAmount] = useState('')
+  const actions = useGameActions(game?.id)
 
   // Show "no game loaded" state when gameAddress is empty or undefined
-  if (!gameAddress) {
+  if (!game) {
     return (
       <div className='bg-black/30 backdrop-blur-sm border border-white/20 rounded-lg p-6 shadow-2xl'>
         <div className='flex items-center justify-center'>
@@ -27,7 +28,7 @@ export default function GameControls({ gameAddress }: Props) {
     )
   }
 
-  if (loading || !game) {
+  if (game.status === 'loading') {
     return (
       <div className='bg-black/30 backdrop-blur-sm border border-white/20 rounded-lg p-6 shadow-2xl'>
         <div className='flex items-center justify-center'>

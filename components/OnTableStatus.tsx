@@ -1,16 +1,14 @@
 'use client'
 import React from 'react'
 import { en } from '~/lib/dictionaries'
-import { useMockGame } from '~/lib/hooks/useMockGame'
+import { GameState } from '~/lib/models/GameState'
 
 interface Props {
-  readonly gameAddress?: string
+  readonly game?: GameState | null
 }
 
-export default function OnTableStatus({ gameAddress }: Props) {
-  const { game, loading } = useMockGame(gameAddress)
-
-  if (!gameAddress) {
+export default function OnTableStatus({ game }: Props) {
+  if (!game) {
     return (
       <div className='flex items-center justify-center p-4'>
         <div className='text-center'>
@@ -23,7 +21,7 @@ export default function OnTableStatus({ gameAddress }: Props) {
     )
   }
 
-  if (loading || !game) {
+  if (game.status === 'loading') {
     return (
       <div className='flex items-center justify-center p-8'>
         <div className='text-white'>{en.game.loadingGame}</div>

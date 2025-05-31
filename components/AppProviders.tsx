@@ -1,6 +1,7 @@
 'use client'
 
 import { SuiClientProvider, WalletProvider } from '@mysten/dapp-kit'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { networkConfig } from '~/lib/networkConfig'
 
@@ -16,6 +17,7 @@ export default function AppProviders({ children }: Props) {
       <SuiClientProvider networks={networkConfig} defaultNetwork='testnet'>
         <WalletProvider autoConnect>{children}</WalletProvider>
       </SuiClientProvider>
+      <ReactQueryDevtools initialIsOpen={true} />
     </QueryClientProvider>
   )
 }

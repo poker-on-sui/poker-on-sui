@@ -1,42 +1,6 @@
 import { useState, useEffect } from 'react'
-
-// Types for the game state
-export interface Player {
-  id: string
-  name: string
-  chips: number
-  cards?: string[]
-  isFolded?: boolean
-  isActive?: boolean
-  hasActed?: boolean
-  currentBet?: number
-  isDealer?: boolean
-  isSmallBlind?: boolean
-  isBigBlind?: boolean
-  position: number
-}
-
-export interface GameState {
-  id: string
-  status:
-    | 'waiting'
-    | 'preflop'
-    | 'flop'
-    | 'turn'
-    | 'river'
-    | 'showdown'
-    | 'finished'
-  players: (Player | null)[]
-  communityCards: string[]
-  pot: number
-  currentBet: number
-  smallBlind: number
-  bigBlind: number
-  dealerPosition: number
-  activePlayerPosition: number
-  round: number
-  maxPlayers: number
-}
+import { GameState } from '../models/GameState'
+import { Player } from '../models/Player'
 
 const mockGame: GameState = {
   id: '0x00',
@@ -50,6 +14,7 @@ const mockGame: GameState = {
       isActive: true,
       hasActed: false,
       currentBet: 100,
+      isFolded: false,
       isDealer: false,
       isSmallBlind: false,
       isBigBlind: false,
@@ -60,6 +25,7 @@ const mockGame: GameState = {
       name: 'Bob',
       chips: 3200,
       cards: ['?', '?'],
+      isFolded: false,
       isActive: false,
       hasActed: true,
       currentBet: 100,
@@ -68,7 +34,6 @@ const mockGame: GameState = {
       isBigBlind: false,
       position: 1,
     },
-    null, // Empty slot
     {
       id: '4',
       name: 'Charlie',
@@ -83,12 +48,12 @@ const mockGame: GameState = {
       isBigBlind: false,
       position: 3,
     },
-    null, // Empty slot
     {
       id: '6',
       name: 'Diana',
       chips: 4150,
       cards: ['?', '?'],
+      isFolded: false,
       isActive: false,
       hasActed: true,
       currentBet: 100,
@@ -102,6 +67,7 @@ const mockGame: GameState = {
       name: 'Eve',
       chips: 1450,
       cards: ['?', '?'],
+      isFolded: false,
       isActive: false,
       hasActed: true,
       currentBet: 100,
@@ -115,6 +81,7 @@ const mockGame: GameState = {
       name: 'Frank',
       chips: 3400,
       cards: ['?', '?'],
+      isFolded: false,
       isActive: false,
       hasActed: true,
       currentBet: 100,
@@ -132,7 +99,7 @@ const mockGame: GameState = {
   dealerPosition: 5,
   activePlayerPosition: 0,
   round: 3,
-  maxPlayers: 8,
+  history: [],
 }
 
 export function useMockGame(addr?: string) {

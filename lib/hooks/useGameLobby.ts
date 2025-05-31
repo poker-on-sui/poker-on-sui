@@ -22,7 +22,19 @@ function useHostGame() {
   const pokerPackageId = useNetworkVariable('pokerPackageId')
   const suiClient = useSuiClient()
   const router = useRouter()
-  const { mutateAsync } = useSignAndExecuteTransaction()
+  const { mutateAsync } = useSignAndExecuteTransaction({
+    execute: async ({ bytes, signature }) =>
+      await suiClient.executeTransactionBlock({
+        transactionBlock: bytes,
+        signature,
+        options: {
+          // Raw effects are required so the effects can be reported back to the wallet
+          showRawEffects: true,
+          // Select additional data to return
+          showObjectChanges: true,
+        },
+      }),
+  })
 
   const createGame = async (): Promise<void> => {
     const tx = new Transaction()
@@ -30,12 +42,29 @@ function useHostGame() {
       target: `${pokerPackageId}::game::create_game`,
       arguments: [tx.pure.u64(defaultGameConfig.buy_in)],
     })
-    const signed = await mutateAsync({ transaction: tx })
+    const { objectChanges } = await mutateAsync({ transaction: tx })
+    if (!objectChanges || objectChanges.length === 0) {
+      console.error('Failed to create game: No object changed!')
+      return
+    }
 
-    const result = await suiClient.waitForTransaction(signed)
-    console.log('Game created:', result)
+    console.log('Game created, objectChanges:', objectChanges)
+    const createdObjectId = objectChanges
+      ?.map(
+        o =>
+          o.type === 'created' &&
+          o.objectType === `${pokerPackageId}::game::PokerGame` &&
+          o.objectId
+      )
+      .filter(Boolean)[0]
 
-    router.push(`/game/?addr=${result.digest}`)
+    if (!createdObjectId) {
+      console.error('Failed to create game: No Game ID found')
+      return
+    }
+    console.log('Game created with ID:', createdObjectId)
+
+    router.push(`/game/?addr=${createdObjectId}`)
   }
 
   return { createGame }
