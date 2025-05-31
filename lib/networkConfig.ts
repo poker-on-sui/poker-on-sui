@@ -1,9 +1,9 @@
 import { createNetworkConfig } from '@mysten/dapp-kit'
 import { getFullnodeUrl } from '@mysten/sui/client'
 import {
-  PACKAGE_ID_DEVNET,
-  PACKAGE_ID_TESTNET,
-  PACKAGE_ID_MAINNET,
+  POKER_PACKAGE_ID_DEVNET,
+  POKER_PACKAGE_ID_TESTNET,
+  POKER_PACKAGE_ID_MAINNET,
 } from './constants'
 
 const { networkConfig, useNetworkVariable, useNetworkVariables } =
@@ -11,19 +11,19 @@ const { networkConfig, useNetworkVariable, useNetworkVariables } =
     devnet: {
       url: getFullnodeUrl('devnet'),
       variables: {
-        counterPackageId: PACKAGE_ID_DEVNET,
+        pokerPackageId: POKER_PACKAGE_ID_DEVNET,
       },
     },
     testnet: {
       url: getFullnodeUrl('testnet'),
       variables: {
-        counterPackageId: PACKAGE_ID_TESTNET,
+        pokerPackageId: POKER_PACKAGE_ID_TESTNET,
       },
     },
     mainnet: {
       url: getFullnodeUrl('mainnet'),
       variables: {
-        counterPackageId: PACKAGE_ID_MAINNET,
+        pokerPackageId: POKER_PACKAGE_ID_MAINNET,
       },
     },
   })

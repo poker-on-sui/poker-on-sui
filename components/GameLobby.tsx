@@ -1,44 +1,23 @@
 'use client'
-import React, { useState } from 'react'
+import React from 'react'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
-import { isValidSuiAddress } from '../lib/utils'
+
 import { en } from '~/lib/dictionaries'
+import { useGameLobby } from '~/lib/hooks/useGameLobby'
 
-interface GameLobbyProps {
-  onHostGame?: () => void
-  onJoinGame?: (gameAddress: string) => void
-}
-
-export default function GameLobby({ onHostGame, onJoinGame }: GameLobbyProps) {
-  const [gameAddress, setGameAddress] = useState('')
-  const [addressError, setAddressError] = useState('')
-
-  const handleHostClick = () => onHostGame?.()
-
-  const handleJoinClick = () => {
-    const trimmedAddress = gameAddress.trim()
-
-    if (!trimmedAddress) return setAddressError(en.errors.missingGameAddress)
-    if (!isValidSuiAddress(trimmedAddress))
-      return setAddressError(en.errors.invalidGameAddress)
-
-    setAddressError('')
-    onJoinGame?.(trimmedAddress)
-  }
-
-  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    setGameAddress(value)
-
-    // Clear error when user starts typing
-    if (addressError) setAddressError('')
-  }
-
+export default function GameLobby() {
+  const {
+    createGame,
+    joinGame,
+    gameAddress,
+    addressError,
+    handleAddressChange,
+  } = useGameLobby()
   return (
     <div className='flex flex-col gap-6 w-full max-w-xs'>
       <Button
-        onClick={handleHostClick}
+        onClick={createGame}
         className='cursor-pointer  w-full py-3 bg-gradient-to-r from-green-500 to-emerald-700 text-white rounded-lg text-xl font-bold shadow-lg hover:from-green-400 hover:to-emerald-600 transition drop-shadow-glow'
       >
         {en.lobby.host}
@@ -60,7 +39,7 @@ export default function GameLobby({ onHostGame, onJoinGame }: GameLobbyProps) {
           <div className='text-red-400 text-sm mt-1 px-1'>{addressError}</div>
         )}
         <Button
-          onClick={handleJoinClick}
+          onClick={joinGame}
           disabled={!gameAddress.trim()}
           className='cursor-pointer w-full py-3 bg-gradient-to-r from-blue-600 to-purple-700 text-white rounded-lg text-xl font-bold shadow-lg hover:from-blue-500 hover:to-purple-600 transition drop-shadow-glow disabled:opacity-50 disabled:cursor-not-allowed'
         >

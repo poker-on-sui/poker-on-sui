@@ -2,7 +2,7 @@
 import React from 'react'
 import Image from 'next/image'
 
-import { useGame } from '~/lib/hooks/useGame'
+import { useMockGame } from '~/lib/hooks/useMockGame'
 import GameControls from './GameControls'
 import OnTableStatus from './OnTableStatus'
 import tablePng from '~/assets/table.png'
@@ -12,7 +12,7 @@ interface Props {
 }
 
 export default function GameTable({ gameAddress }: Props) {
-  const {} = useGame(gameAddress) // TODO: Implement game logic and state management
+  const {} = useMockGame(gameAddress) // TODO: Implement game logic and state management
 
   return (
     <div className='h-full w-full relative'>

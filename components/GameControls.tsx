@@ -2,14 +2,14 @@
 import React, { useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
-import { useGame } from '~/lib/hooks/useGame'
+import { useMockGame } from '~/lib/hooks/useMockGame'
 
 interface Props {
   readonly gameAddress?: string
 }
 
 export default function GameControls({ gameAddress }: Props) {
-  const { game, loading, actions } = useGame(gameAddress)
+  const { game, loading, actions } = useMockGame(gameAddress)
   const [raiseAmount, setRaiseAmount] = useState(0)
   const [customBetAmount, setCustomBetAmount] = useState('')
 
