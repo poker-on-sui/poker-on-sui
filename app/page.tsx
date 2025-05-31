@@ -1,11 +1,24 @@
+'use client'
 import React from 'react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { Button } from '../components/ui/button'
 import GameLobby from '../components/GameLobby'
 import GameRules from '../components/GameRules'
 import { en } from '~/lib/dictionaries'
 
 export default function HomePage() {
+  const router = useRouter()
+
+  const handleHostGame = () => {
+    // For now, redirect to game page without address (could show a "create game" flow)
+    router.push('/game')
+  }
+
+  const handleJoinGame = (gameAddress: string) => {
+    // Navigate to game page with address as search parameter
+    router.push(`/game?addr=${encodeURIComponent(gameAddress)}`)
+  }
   return (
     <div className='min-h-screen flex flex-col bg-gradient-to-br from-[#0f2027] via-[#2c5364] to-[#232526] relative'>
       {/* Top bar */}
@@ -44,7 +57,7 @@ export default function HomePage() {
             className='opacity-80 w-[12px] h-[16px]'
           />
         </div>
-        <GameLobby />
+        <GameLobby onHostGame={handleHostGame} onJoinGame={handleJoinGame} />
       </div>
     </div>
   )

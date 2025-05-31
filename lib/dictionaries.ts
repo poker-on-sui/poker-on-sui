@@ -30,6 +30,21 @@ export const dictionaries = {
       invalidSuiAddress:
         'Invalid SUI address format. Address must be 64 hex characters prefixed with 0x',
     },
+    game: {
+      noGameLoaded: 'No game loaded',
+      loadingGame: 'Loading game status...',
+      gameNotFound: 'Game not found or has ended',
+      joinGame: 'Join Game',
+      hostGame: 'Host Game',
+      joinOrCreateGame: 'Join or create a game to see the table status',
+      pot: 'Pot:',
+      currentBet: 'Current Bet:',
+      yourChips: 'Your Chips:',
+      waitingFor: 'Waiting for',
+      otherPlayer: 'other player',
+      yourTurn: 'Your turn -',
+      round: 'Round',
+    },
 
     // Game rules dialog
     rules: {

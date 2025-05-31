@@ -17,7 +17,7 @@ export default function GameTable({ gameAddress }: Props) {
   return (
     <div className='h-full w-full relative'>
       {/* Background image */}
-      <div className='absolute inset-0 z-0 pt-20'>
+      <div className='absolute left-0 top-20 z-0 w-full'>
         <Image
           src={tablePng}
           alt='Poker Table'
@@ -25,10 +25,10 @@ export default function GameTable({ gameAddress }: Props) {
           className='w-full h-auto object-cover'
           priority
         />
-      </div>
-      {/* Game content will go here */}
-      <div className='absolute top-20 left-4 right-4 z-10'>
-        <OnTableStatus gameAddress={gameAddress} />
+        {/* Game content will go here */}
+        <div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10'>
+          <OnTableStatus gameAddress={gameAddress} />
+        </div>
       </div>
       <div className='absolute bottom-0 left-0 right-0 w-full z-10'>
         <GameControls gameAddress={gameAddress} />

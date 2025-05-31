@@ -16,7 +16,7 @@ export default function GameControls({ gameAddress }: Props) {
   // Show "no game loaded" state when gameAddress is empty or undefined
   if (!gameAddress) {
     return (
-      <div className='bg-black/80 backdrop-blur-sm border border-white/20 rounded-lg p-6 shadow-2xl'>
+      <div className='bg-black/30 backdrop-blur-sm border border-white/20 rounded-lg p-6 shadow-2xl'>
         <div className='flex items-center justify-center'>
           <div className='text-center text-gray-400'>
             <div className='text-lg font-medium mb-2'>No Game Loaded</div>
@@ -29,7 +29,7 @@ export default function GameControls({ gameAddress }: Props) {
 
   if (loading || !game) {
     return (
-      <div className='bg-black/80 backdrop-blur-sm border border-white/20 rounded-lg p-6 shadow-2xl'>
+      <div className='bg-black/30 backdrop-blur-sm border border-white/20 rounded-lg p-6 shadow-2xl'>
         <div className='flex items-center justify-center'>
           <div className='text-white'>Loading game controls...</div>
         </div>
@@ -63,7 +63,7 @@ export default function GameControls({ gameAddress }: Props) {
   }
 
   return (
-    <div className='bg-black/80 backdrop-blur-sm border border-white/20 rounded-lg p-6 shadow-2xl'>
+    <div className='bg-black/30 backdrop-blur-sm border border-white/20 rounded-lg p-6 shadow-2xl'>
       <div className='space-y-4'>
         {/* Action Buttons */}
         <div className='flex gap-3'>
