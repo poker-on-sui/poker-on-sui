@@ -10,3 +10,9 @@ a SUI blockchain smart contract. The game supports 2-10 players in a session.
 - Responsive design for different screen sizes
 - ShadCN UI components for consistent styling
 - Tailwind CSS for custom styling
+
+## Code Style
+
+- Use TypeScript for type safety
+- Follow React best practices
+- Avoid bracket if statement is a single line
