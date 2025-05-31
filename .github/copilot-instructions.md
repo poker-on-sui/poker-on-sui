@@ -19,4 +19,5 @@ a SUI blockchain smart contract. The game supports 2-10 players in a session.
 - Use import alias "~/" for local imports whenever possible
 - In React components, always create a Props interface to define the props for that component, instead of using inline types
 - React components should only be used to render UI, all logic should be handled in hooks or utility functions
-- Use (and update if needed) lib/dictionaries.ts for all text content
+- Use (and update if needed) `lib/dictionaries.ts` for all text content
+- When dynamic classes are needed, use `cn` function in `lib/utils.ts` to merge them
