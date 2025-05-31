@@ -16,3 +16,5 @@ a SUI blockchain smart contract. The game supports 2-10 players in a session.
 - Use TypeScript for type safety
 - Follow React best practices
 - Avoid bracket if statement is a single line
+- Use import alias "~/" for local imports whenever possible
+- In React components, always create a Props interface to define the props for that component, instead of using inline types

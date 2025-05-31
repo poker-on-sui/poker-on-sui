@@ -1,4 +1,3 @@
-'use client'
 import React from 'react'
 import Image from 'next/image'
 import { Button } from '../components/ui/button'
@@ -6,17 +5,7 @@ import GameLobby from '../components/GameLobby'
 import GameRules from '../components/GameRules'
 import { en } from '~/lib/dictionaries'
 
-export default function Home() {
-  const handleHostGame = () => {
-    console.log('Host game clicked')
-    // TODO: Implement host game logic
-  }
-
-  const handleJoinGame = (gameAddress: string) => {
-    console.log('Join game clicked with address:', gameAddress)
-    // TODO: Implement join game logic
-  }
-
+export default function HomePage() {
   return (
     <div className='min-h-screen flex flex-col bg-gradient-to-br from-[#0f2027] via-[#2c5364] to-[#232526] relative'>
       {/* Top bar */}
@@ -50,12 +39,12 @@ export default function Home() {
             src='/Sui_Symbol_White.svg'
             alt='SUI'
             width={12}
-            height={12}
+            height={16}
             unoptimized
-            className='opacity-80'
+            className='opacity-80 w-[12px] h-[16px]'
           />
         </div>
-        <GameLobby onHostGame={handleHostGame} onJoinGame={handleJoinGame} />
+        <GameLobby />
       </div>
     </div>
   )
