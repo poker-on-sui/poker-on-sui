@@ -7,12 +7,23 @@ import { GameState } from '~/lib/models/GameState'
 
 interface Props {
   readonly game?: GameState
+  readonly loading?: boolean
 }
 
-export default function GameControls({ game }: Props) {
+export default function GameControls({ game, loading }: Props) {
   const [raiseAmount, setRaiseAmount] = useState(0)
   const [customBetAmount, setCustomBetAmount] = useState('')
   const actions = useGameActions(game?.id)
+
+  if (loading) {
+    return (
+      <div className='bg-black/30 backdrop-blur-sm border border-white/20 rounded-lg p-6 shadow-2xl'>
+        <div className='flex items-center justify-center'>
+          <div className='text-white'>Loading game controls...</div>
+        </div>
+      </div>
+    )
+  }
 
   // Show "no game loaded" state when gameAddress is empty or undefined
   if (!game) {
@@ -28,17 +39,7 @@ export default function GameControls({ game }: Props) {
     )
   }
 
-  if (game.status === 'loading') {
-    return (
-      <div className='bg-black/30 backdrop-blur-sm border border-white/20 rounded-lg p-6 shadow-2xl'>
-        <div className='flex items-center justify-center'>
-          <div className='text-white'>Loading game controls...</div>
-        </div>
-      </div>
-    )
-  }
-
-  const currentPlayer = game.players[game.activePlayerPosition]
+  const currentPlayer = game.players[game.currentPlayer]
   const isMyTurn = currentPlayer?.isActive && !currentPlayer?.isFolded
   const callAmount = game.currentBet - (currentPlayer?.currentBet || 0)
   const minRaise = game.currentBet > 0 ? game.currentBet * 2 : game.bigBlind

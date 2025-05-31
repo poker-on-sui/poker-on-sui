@@ -57,6 +57,13 @@ export const dictionaries = {
         joining: 'Joining game...',
         starting: 'Starting game...',
         processing: 'Processing action...',
+        preFlop: 'Pre-Flop',
+        flop: 'Flop',
+        turn: 'Turn',
+        river: 'River',
+        showdown: 'Showdown',
+        finished: 'Game Finished',
+        waitingForPlayers: 'Waiting for players to join',
       },
     },
 

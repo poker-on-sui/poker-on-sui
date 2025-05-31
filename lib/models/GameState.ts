@@ -1,16 +1,9 @@
+import { PokerGameState } from './MovePokerGameSchema'
 import { Player } from './Player'
 
 export interface GameState {
   id: string
-  status:
-    | 'loading'
-    | 'waiting'
-    | 'preflop'
-    | 'flop'
-    | 'turn'
-    | 'river'
-    | 'showdown'
-    | 'finished'
+  status: PokerGameState
   players: Player[]
   communityCards: string[]
   pot: number
@@ -18,6 +11,5 @@ export interface GameState {
   smallBlind: number
   bigBlind: number
   dealerPosition: number
-  activePlayerPosition: number
-  round: number
+  currentPlayer: number
 }
