@@ -1,3 +1,3 @@
-# CommandOSS Test 01
+# 🃏 Poker-on-Sui Game - FE
 
-WIP
+A mini project for CommandOSS Hacker House 2025

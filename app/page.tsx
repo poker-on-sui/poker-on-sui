@@ -1,103 +1,111 @@
-import Image from "next/image";
+'use client'
+import React, { useState } from 'react'
+import { Button } from '../components/ui/button'
+import { Input } from '../components/ui/input'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+  DialogTrigger,
+} from '../components/ui/dialog'
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [showModal, setShowModal] = useState(false)
+  const [gameAddress, setGameAddress] = useState('')
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  return (
+    <div className='min-h-screen flex flex-col bg-gradient-to-br from-[#0f2027] via-[#2c5364] to-[#232526] relative'>
+      {/* Top bar */}
+      <div className='flex justify-between items-center p-4'>
+        {/* Help icon */}
+        <Dialog open={showModal} onOpenChange={setShowModal}>
+          <DialogTrigger asChild>
+            <Button
+              aria-label='Game Rules'
+              variant='ghost'
+              className='text-2xl font-bold text-cyan-300 hover:text-cyan-400 transition drop-shadow-glow px-3 py-1'
+            >
+              ?
+            </Button>
+          </DialogTrigger>
+          <DialogContent className='bg-[#181f2a] border border-cyan-700'>
+            <DialogHeader>
+              <DialogTitle className='text-2xl font-bold mb-4 bg-gradient-to-r from-cyan-300 via-blue-400 to-purple-500 bg-clip-text text-transparent'>
+                How to Play
+              </DialogTitle>
+              <DialogDescription asChild>
+                <ul className='list-disc pl-5 space-y-2 text-cyan-100'>
+                  <li>
+                    Host a new game or join an existing one using the game
+                    address.
+                  </li>
+                  <li>Connect your SUI wallet to participate.</li>
+                  <li>
+                    Each player receives two cards. Five community cards are
+                    dealt face up.
+                  </li>
+                  <li>Betting rounds: Pre-flop, Flop, Turn, River.</li>
+                  <li>
+                    Use actions: Check, Call, Raise, Fold, or All-in on your
+                    turn.
+                  </li>
+                  <li>Best five-card hand wins the pot at showdown.</li>
+                  <li>
+                    All game logic and funds are managed securely on the SUI
+                    blockchain.
+                  </li>
+                </ul>
+              </DialogDescription>
+              <div className='mt-4 text-sm text-cyan-400'>
+                For more details, see the full rules in the documentation.
+              </div>
+            </DialogHeader>
+            <DialogClose asChild>
+              <Button
+                variant='ghost'
+                size='icon'
+                className='absolute top-2 right-2 text-cyan-400 hover:text-cyan-200 text-2xl'
+              >
+                <span aria-hidden>×</span>
+                <span className='sr-only'>Close</span>
+              </Button>
+            </DialogClose>
+          </DialogContent>
+        </Dialog>
+        {/* Connect Wallet placeholder */}
+        <Button className='px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-700 rounded shadow text-white font-semibold hover:from-cyan-400 hover:to-blue-600 transition drop-shadow-glow'>
+          Connect Wallet
+        </Button>
+      </div>
+
+      {/* Main content */}
+      <div className='flex flex-1 flex-col items-center justify-center'>
+        <h1 className='text-4xl font-extrabold mb-8 bg-gradient-to-r from-cyan-300 via-blue-400 to-purple-500 bg-clip-text text-transparent drop-shadow-glow'>
+          Welcome to Texas Hold&#39;em Poker
+        </h1>
+        <div className='flex flex-col gap-6 w-full max-w-xs'>
+          <Button className='w-full py-3 bg-gradient-to-r from-green-500 to-emerald-700 text-white rounded-lg text-xl font-bold shadow-lg hover:from-green-400 hover:to-emerald-600 transition drop-shadow-glow'>
+            Host
+          </Button>
+          <div className='flex flex-col gap-2'>
+            <Input
+              type='text'
+              placeholder='Enter Game Address'
+              value={gameAddress}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setGameAddress(e.target.value)
+              }
+              className='w-full px-4 py-2 border border-cyan-700 bg-[#1a2634] text-cyan-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 placeholder:text-cyan-400'
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            <Button className='w-full py-3 bg-gradient-to-r from-blue-600 to-purple-700 text-white rounded-lg text-xl font-bold shadow-lg hover:from-blue-500 hover:to-purple-600 transition drop-shadow-glow'>
+              Join
+            </Button>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
     </div>
-  );
+  )
 }
