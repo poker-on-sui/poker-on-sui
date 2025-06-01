@@ -57,12 +57,10 @@ const sixPlayers = [
   createMockPlayer('player_6', 'Frank', 5, 750, ['9_spade', '9_heart']),
 ]
 
-const tenPlayers = [
+const eightPlayers = [
   ...sixPlayers,
   createMockPlayer('player_7', 'Grace', 6, 1100, ['A_diamond', 'J_spade']),
   createMockPlayer('player_8', 'Henry', 7, 900, ['10_heart', '10_spade']),
-  createMockPlayer('player_9', 'Ivy', 8, 1300, ['8_heart', '8_club']),
-  createMockPlayer('player_10', 'Jack', 9, 600, ['7_spade', '7_diamond']),
 ]
 
 // Game state mocks for different scenarios
@@ -392,10 +390,10 @@ export const gameOverMultipleWinners: GameState = {
 }
 
 // Special scenarios
-export const tenPlayersFullTable: GameState = {
-  id: 'game_ten_players',
+export const eightPlayersFullTable: GameState = {
+  id: 'game_eight_players',
   status: PokerGameState.PRE_FLOP,
-  players: tenPlayers.map((p, i) => ({
+  players: eightPlayers.map((p, i) => ({
     ...p,
     currentBet: i === 1 ? 25 : i === 2 ? 50 : 0,
     hasActed: i === 1 || i === 2,
@@ -470,7 +468,7 @@ export const mockGameStates = {
   gameOverMultipleWinners,
   
   // Special scenarios
-  tenPlayersFullTable,
+  tenPlayersFullTable: eightPlayersFullTable,
   lowStacksEndGame,
 }
 

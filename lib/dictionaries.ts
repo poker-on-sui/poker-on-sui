@@ -46,6 +46,15 @@ export const dictionaries = {
       round: 'Round',
       playersJoined: 'players joined',
       startGame: 'Start Game',
+      // Player labels
+      dealer: 'Dealer',
+      smallBlind: 'Small Blind',
+      bigBlind: 'Big Blind',
+      folded: 'Folded',
+      address: 'Address:',
+      chips: 'Chips:',
+      position: 'Position:',
+      currentBetLabel: 'Current Bet:',
       actions: {
         fold: 'Fold',
         check: 'Check',

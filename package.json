@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@dicebear/collection": "^9.2.2",
+    "@dicebear/core": "^9.2.2",
     "@mysten/dapp-kit": "^0.16.5",
     "@mysten/seal": "^0.4.6",
     "@mysten/sui": "^1.30.1",
