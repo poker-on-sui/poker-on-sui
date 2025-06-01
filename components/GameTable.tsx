@@ -87,19 +87,14 @@ export default function GameTable({}: Props) {
               transition={{ duration: 0.5, delay: 0.8 }}
             >
               <span className="text-white italic text-sm">All-in-</span>
-              <motion.div
-                animate={{ rotate: [0, 360] }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-              >
-                <Image
-                  src={suiIconSvg}
-                  alt="SUI"
-                  unoptimized
-                  className="opacity-80 w-[8px] h-[10px]"
-                />
-              </motion.div>
+              <Image
+                src={suiIconSvg}
+                alt="SUI"
+                unoptimized
+                className="opacity-80 w-[8px] h-[10px]"
+              />
             </motion.div>
-          </motion.div>{' '}
+          </motion.div>
           {/* The Table */}
           <motion.div
             key={`table-${account.address}`}
