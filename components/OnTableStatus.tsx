@@ -2,19 +2,16 @@
 import React from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Button } from '~/components/ui/button'
-import { useGameActions } from '~/lib/hooks/useGameActions'
 import { en } from '~/lib/dictionaries'
-import { GameState } from '~/lib/models/GameState'
 import { PokerGameState } from '~/lib/models/MovePokerGameSchema'
 import { cn } from '~/lib/utils'
 import { formatMist } from '~/lib/format-mist'
 import { SuiIcon } from './SuiIcon'
+import { useGameControl } from '~/lib/hooks/useGameControl'
+import { useGameInfoQuery } from '~/lib/queries/getGameInfo'
 
 interface Props {
-  readonly game?: GameState
-  loading?: boolean
-  /** Current connected wallet address */
-  address?: string
+  gameAddr: string | undefined
 }
 
 // Helper function to get phase-specific styling
@@ -71,10 +68,11 @@ function getPhaseStyles(status: PokerGameState) {
   }
 }
 
-export default function OnTableStatus({ game, loading }: Props) {
-  const actions = useGameActions()
+export default function OnTableStatus({ gameAddr }: Props) {
+  const { handleStartGame, loading } = useGameControl(gameAddr)
+  const { data: game, isLoading: loadingGame } = useGameInfoQuery(gameAddr)
 
-  if (loading) {
+  if (loading || loadingGame) {
     return (
       <motion.div
         className="flex items-center justify-center p-8"
@@ -165,13 +163,11 @@ export default function OnTableStatus({ game, loading }: Props) {
           >
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
-                onClick={() => actions.createGame()}
-                disabled={actions.isLoading}
+                onClick={handleStartGame}
+                disabled={loading}
                 className="bg-gradient-to-r from-green-500 to-emerald-700 text-white text-lg font-bold px-8 py-3 rounded-lg shadow-lg hover:from-green-400 hover:to-emerald-600 transition-all duration-200 disabled:opacity-50"
               >
-                {actions.isLoading
-                  ? en.game.status.starting
-                  : en.game.startGame}
+                {loading ? en.game.status.starting : en.game.startGame}
               </Button>
             </motion.div>
             <motion.div

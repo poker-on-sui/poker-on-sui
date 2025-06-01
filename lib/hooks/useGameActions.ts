@@ -10,16 +10,16 @@ import { getDictionary } from '~/lib/dictionaries'
 import { getGameInfo, useGameInfoQuery } from '../queries/getGameInfo'
 import { ok, failed, Result } from '~/lib/result'
 import { PokerGameState } from '../models/MovePokerGameSchema'
+import { formatMist } from '../format-mist'
 
 const dict = getDictionary()
 
 const DEFAULT_BUY_IN = 100_000_000 // 0.1 SUI
 
-export function useGameActions() {
+export function useGameActions(gameAddr: string | undefined) {
   const [account] = useAccounts()
   const suiClient = useSuiClient()
-  const [currentGameAddr, setCurrentGameAddr] = useState<string | undefined>()
-  const { data: currentGame } = useGameInfoQuery(currentGameAddr)
+  const { data: currentGame } = useGameInfoQuery(gameAddr)
   const { mutateAsync: mutateWithObjectChangesAsync } =
     useSignAndExecuteTransaction({
       execute: async ({ bytes, signature }) =>
@@ -39,7 +39,8 @@ export function useGameActions() {
       try {
         const result = await mutateWithObjectChangesAsync({ transaction })
         console.log('Transaction executed:', result)
-        return ok(result.objectChanges ?? [])
+        if (result.errors?.length) return failed(result.errors.join(', '))
+        return ok(result)
       } catch (error) {
         console.error('Transaction error:', error)
         return failed(
@@ -72,21 +73,19 @@ export function useGameActions() {
 
   const createGame = useCallback(
     async (buyIn: number = DEFAULT_BUY_IN) => {
+      console.log(
+        `Creating game with buy-in: ${buyIn} MIST (${formatMist(buyIn)} SUI)`
+      )
       try {
         const tx = new Transaction()
-
-        // Convert buyIn to MIST (1 SUI = 10^9 MIST)
-        const buyInMist = Math.floor(buyIn * 1_000_000_000)
-        const [coin] = tx.splitCoins(tx.gas, [buyInMist])
-
+        const [coin] = tx.splitCoins(tx.gas, [buyIn])
         tx.moveCall({
           target: `${pokerPackageId}::game::create_game`,
           arguments: [coin],
         })
-
         const result = await executeTransactionWithObjectChanges(tx)
         if (result.ok) {
-          const createdObject = result.data
+          const createdObject = (result.data.objectChanges || [])
             .filter(obj => obj.type === 'created')
             .pop()
           if (!createdObject) return failed('No object was created!')
@@ -113,8 +112,6 @@ export function useGameActions() {
       const game = await getGameInfo(gameAddr, suiClient)
       if (!game) return failed(dict.errors.gameNotFound)
 
-      setCurrentGameAddr(gameAddr)
-
       if (game.players.some(p => p.id === account.address)) return ok()
 
       try {
@@ -129,6 +126,9 @@ export function useGameActions() {
         const result = await executeTransactionWithObjectChanges(tx)
         if (!result.ok) return result
 
+        // Wait for transaction to be confirmed
+        await suiClient.waitForTransaction({ digest: result.data.digest })
+
         console.log('Joined game successfully:', gameAddr)
         return ok()
       } catch (error) {
@@ -141,29 +141,35 @@ export function useGameActions() {
     [account, suiClient, pokerPackageId, executeTransactionWithObjectChanges]
   )
 
-  const startGame = useCallback(
-    async (gameAddr: string): Promise<Result> => {
-      if (!gameAddr) return failed(dict.errors.missingGameAddress)
+  const startGame = useCallback(async (): Promise<Result> => {
+    if (!currentGame) return failed(dict.errors.gameNotFound)
 
-      try {
-        const tx = new Transaction()
-        tx.moveCall({
-          target: `${pokerPackageId}::game::start_game`,
-          arguments: [tx.object(gameAddr), tx.object.random()],
-        })
+    try {
+      const tx = new Transaction()
+      tx.moveCall({
+        target: `${pokerPackageId}::game::start_game`,
+        arguments: [tx.object(currentGame.id), tx.object.random()],
+      })
 
-        const result = await executeTransactionWithObjectChanges(tx)
-        if (!result.ok) return failed(result.error)
-        return ok()
-      } catch (error) {
-        console.error('Start game error:', error)
-        return failed(
-          error instanceof Error ? error.message : 'Failed to start game'
-        )
-      }
-    },
-    [pokerPackageId, executeTransactionWithObjectChanges]
-  )
+      const result = await executeTransactionWithObjectChanges(tx)
+
+      if (!result.ok) return failed(result.error)
+
+      // Wait for transaction to be confirmed
+      await suiClient.waitForTransaction({ digest: result.data.digest })
+      return ok()
+    } catch (error) {
+      console.error('Start game error:', error)
+      return failed(
+        error instanceof Error ? error.message : 'Failed to start game'
+      )
+    }
+  }, [
+    currentGame,
+    pokerPackageId,
+    executeTransactionWithObjectChanges,
+    suiClient,
+  ])
 
   // TODO: Implement fold, check, call, bet, raise actions
   const fold = useCallback(() => {

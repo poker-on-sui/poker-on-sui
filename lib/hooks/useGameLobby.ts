@@ -14,7 +14,7 @@ export function useGameLobby() {
 }
 
 function useHostGame() {
-  const { createGame } = useGameActions()
+  const { createGame } = useGameActions(undefined)
   const [createError, setCreateError] = useState('')
   const pokerPackageId = useNetworkVariable('pokerPackageId')
   const router = useRouter()
@@ -38,7 +38,7 @@ function useHostGame() {
 export function useJoinGame() {
   const [gameAddress, setGameAddress] = useState('')
   const [joinError, setJoinError] = useState('')
-  const { joinGame } = useGameActions()
+  const { joinGame } = useGameActions(undefined)
   const router = useRouter()
 
   const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -17,12 +17,12 @@ import WalletConnectionPrompt from './WalletConnectionPrompt'
 import { useGameTable } from '~/lib/hooks/useGameTable'
 
 interface Props {
-  readonly gameAddress?: string
+  readonly gameAddr?: string
 }
 
-export default function GameTable({ gameAddress }: Props) {
+export default function GameTable({ gameAddr }: Props) {
   const [account] = useAccounts()
-  const { game, isLoading } = useGameTable(gameAddress)
+  const { game } = useGameTable(gameAddr)
 
   return (
     <AnimatePresence mode="wait">
@@ -122,22 +122,14 @@ export default function GameTable({ gameAddress }: Props) {
               key={`table-status-${account.address}`}
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
             >
-              <OnTableStatus
-                game={game}
-                loading={isLoading}
-                address={account?.address}
-              />
+              <OnTableStatus gameAddr={gameAddr} />
             </div>
           </motion.div>
           <div
             key={`game-controls-${account.address}`}
             className="absolute bottom-0 left-0 right-0 w-full z-10"
           >
-            <GameControls
-              game={game}
-              loading={isLoading}
-              address={account?.address}
-            />
+            <GameControls gameAddr={gameAddr} address={account?.address} />
           </div>
         </motion.div>
       )}

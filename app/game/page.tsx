@@ -12,7 +12,7 @@ function GamePageContent() {
     if (addr) setGameAddress(addr)
   }, [searchParams])
 
-  return <GameTable gameAddress={gameAddress} />
+  return <GameTable gameAddr={gameAddress} />
 }
 
 export default function GamePage() {

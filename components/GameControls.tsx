@@ -1,28 +1,42 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Slider } from '~/components/ui/slider'
-import { useGameActions } from '~/lib/hooks/useGameActions'
-import { GameState } from '~/lib/models/GameState'
 import { formatMist } from '~/lib/format-mist'
 import { SuiIcon } from './SuiIcon'
 import { en } from '~/lib/dictionaries'
+import { PokerGameState } from '~/lib/models/MovePokerGameSchema'
+import { useGameControl } from '~/lib/hooks/useGameControl'
+import { useGameInfoQuery } from '~/lib/queries/getGameInfo'
 
 interface Props {
-  readonly game?: GameState
-  readonly loading?: boolean
+  gameAddr: string | undefined
   /** Current connected wallet address */
   readonly address?: string
 }
 
-export default function GameControls({ game, loading, address }: Props) {
+export default function GameControls({ gameAddr, address }: Props) {
   const [raiseAmount, setRaiseAmount] = useState(0)
   const [customBetAmount, setCustomBetAmount] = useState('')
-  const actions = useGameActions()
+  const { data: game, isLoading: loadingGame } = useGameInfoQuery(gameAddr)
 
-  const currentPlayer = !game ? undefined : game.players[game.currentPlayer]
+  const {
+    handleCall,
+    handleCheck,
+    handleFold,
+    // _handleBet,
+    handleRaise: _handleRaise,
+    loading: takingAction,
+  } = useGameControl(gameAddr)
+
+  const isWaiting = !!game && game.status === PokerGameState.WAITING_FOR_PLAYERS
+  const isGameOver = !!game && game.status === PokerGameState.GAME_OVER
+  const currentPlayer =
+    !game || isWaiting || isGameOver
+      ? undefined
+      : game.players[game.currentPlayer]
   const isMyTurn = !currentPlayer ? false : currentPlayer.id === address
   const callAmount = !game
     ? 0
@@ -55,13 +69,18 @@ export default function GameControls({ game, loading, address }: Props) {
     maxRaise,
     raiseAmount,
     customBetAmount,
-    actions.fold,
-    actions.call,
-    actions.raise,
-    loading,
   ])
 
-  if (loading) {
+  const handleRaise = useCallback(() => {
+    const amount = raiseAmount || parseInt(customBetAmount) || minRaise
+    if (amount >= minRaise && amount <= maxRaise) {
+      _handleRaise(amount)
+      setRaiseAmount(0)
+      setCustomBetAmount('')
+    }
+  }, [_handleRaise, customBetAmount, maxRaise, minRaise, raiseAmount])
+
+  if (loadingGame) {
     return (
       <motion.div
         className="bg-black/30 backdrop-blur-sm border border-white/20 rounded-lg p-6 shadow-2xl"
@@ -109,15 +128,6 @@ export default function GameControls({ game, loading, address }: Props) {
   //   }
   // }, [game])
 
-  const handleRaise = () => {
-    const amount = raiseAmount || parseInt(customBetAmount) || minRaise
-    if (amount >= minRaise && amount <= maxRaise) {
-      actions.raise(amount)
-      setRaiseAmount(0)
-      setCustomBetAmount('')
-    }
-  }
-
   const handleCustomBetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCustomBetAmount(e.target.value)
     setRaiseAmount(0)
@@ -146,8 +156,8 @@ export default function GameControls({ game, loading, address }: Props) {
             <Button
               variant="destructive"
               size="lg"
-              onClick={actions.fold}
-              disabled={!isMyTurn}
+              onClick={handleFold}
+              disabled={!isMyTurn || takingAction}
               className="w-full h-12 text-lg font-bold"
             >
               Fold
@@ -163,8 +173,12 @@ export default function GameControls({ game, loading, address }: Props) {
               <Button
                 variant="outline"
                 size="lg"
-                onClick={actions.call}
-                disabled={!isMyTurn || callAmount > (currentPlayer?.chips || 0)}
+                onClick={handleCall}
+                disabled={
+                  !isMyTurn ||
+                  takingAction ||
+                  callAmount > (currentPlayer?.chips || 0)
+                }
                 className="w-full h-12 text-lg font-bold border-blue-500 text-blue-400 hover:bg-blue-500/20"
               >
                 Call {formatMist(callAmount)}
@@ -173,8 +187,8 @@ export default function GameControls({ game, loading, address }: Props) {
               <Button
                 variant="outline"
                 size="lg"
-                onClick={actions.call}
-                disabled={!isMyTurn}
+                onClick={handleCheck}
+                disabled={!isMyTurn || takingAction}
                 className="w-full h-12 text-lg font-bold border-green-500 text-green-400 hover:bg-green-500/20"
               >
                 Check
@@ -191,7 +205,7 @@ export default function GameControls({ game, loading, address }: Props) {
               variant="default"
               size="lg"
               onClick={handleRaise}
-              disabled={!isMyTurn || maxRaise < minRaise}
+              disabled={!isMyTurn || takingAction || maxRaise < minRaise}
               className="w-full h-12 text-lg font-bold bg-orange-600 hover:bg-orange-700 text-white"
             >
               {game.currentBet > 0 ? 'Raise' : 'Bet'}
@@ -243,30 +257,22 @@ export default function GameControls({ game, loading, address }: Props) {
               </div>
 
               {/* Custom Bet Input */}
-              <motion.div
-                className="flex gap-2 items-center"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, delay: 0.1 }}
-              >
+              <div className="flex gap-2 items-center">
                 <Input
                   type="number"
-                  placeholder={`Custom amount (${minRaise}-${maxRaise})`}
+                  placeholder={`Custom amount (${formatMist(
+                    minRaise
+                  )}-${formatMist(maxRaise)} SUI)`}
                   value={customBetAmount}
                   onChange={handleCustomBetChange}
                   min={minRaise}
                   max={maxRaise}
                   className="flex-1 bg-gray-800/50 border-gray-600 text-white placeholder-gray-400"
                 />
-              </motion.div>
+              </div>
 
               {/* Quick Bet Buttons */}
-              <motion.div
-                className="flex gap-2"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-              >
+              <div className="flex gap-2">
                 {[
                   { label: 'Min', value: minRaise },
                   { label: '1/2 Pot', value: Math.floor(game.pot / 2) },
@@ -295,7 +301,7 @@ export default function GameControls({ game, loading, address }: Props) {
                     </Button>
                   </motion.div>
                 ))}
-              </motion.div>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
