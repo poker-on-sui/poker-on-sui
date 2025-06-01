@@ -23,7 +23,7 @@ interface Props {
 export default function GameTable({}: Props) {
   const [account] = useAccounts()
   // const { game, isLoading } = useGameTable(gameAddress)
-  const game = mocks.flopFourPlayersWithBetting
+  const game = mocks.flopTwoPlayers
   const isLoading = false // Simulating loading state for the example
 
   return (
@@ -103,70 +103,44 @@ export default function GameTable({}: Props) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.3, ease: 'easeOut' }}
           >
-            <motion.div
-              key={`table-image-${account.address}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.5 }}
-            >
-              <Image
-                src={tablePng}
-                alt="Poker Table"
-                className="w-full h-full object-cover"
-                priority
-              />
-            </motion.div>
+            <Image
+              src={tablePng}
+              alt="Poker Table"
+              className="w-full h-full object-cover"
+              priority
+            />
 
             {/* Players positioned around the table */}
-            <motion.div
-              key={`players-${account.address}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.8 }}
-            >
-              <Players
-                players={game?.players || []}
-                currentPlayerId={game?.players?.find(p => p.isActive)?.id}
-              />
-            </motion.div>
+            <Players
+              players={game?.players || []}
+              currentPlayerId={game?.players?.find(p => p.isActive)?.id}
+            />
 
-            <motion.div
-              key={`community-cards-${account.address}`}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 1 }}
-            >
-              <CommunityCards cards={game.communityCards} />
-            </motion.div>
+            {/* Community cards */}
+            <CommunityCards cards={game.communityCards} />
 
             {/* Game content will go here */}
-            <motion.div
+            <div
               key={`table-status-${account.address}`}
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 1.2 }}
             >
               <OnTableStatus
                 game={game}
                 loading={isLoading}
                 address={account?.address}
               />
-            </motion.div>
+            </div>
           </motion.div>
-          <motion.div
+          <div
             key={`game-controls-${account.address}`}
             className="absolute bottom-0 left-0 right-0 w-full z-10"
-            initial={{ opacity: 0, y: 100 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 1.4, ease: 'easeOut' }}
           >
             <GameControls
               game={game}
               loading={isLoading}
               address={account?.address}
             />
-          </motion.div>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
