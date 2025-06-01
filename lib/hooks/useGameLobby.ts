@@ -13,10 +13,6 @@ export function useGameLobby() {
   }
 }
 
-const defaultGameConfig = {
-  buy_in: 1000000, // 1 SUI
-}
-
 function useHostGame() {
   const { createGame } = useGameActions()
   const [createError, setCreateError] = useState('')
@@ -28,7 +24,7 @@ function useHostGame() {
       console.error('Poker package ID is not set in network config')
       return
     }
-    const result = await createGame(defaultGameConfig.buy_in)
+    const result = await createGame()
     if (result.ok) {
       console.log('Game created successfully:', result.data)
       router.push(`/game?addr=${result.data}`)
@@ -43,6 +39,7 @@ export function useJoinGame() {
   const [gameAddress, setGameAddress] = useState('')
   const [joinError, setJoinError] = useState('')
   const { joinGame } = useGameActions()
+  const router = useRouter()
 
   const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const address = e.target.value.trim()
@@ -58,11 +55,12 @@ export function useJoinGame() {
     const result = await joinGame(gameAddress)
     if (result.ok) {
       console.log('Successfully joined game:', result.data)
+      router.push(`/game?addr=${gameAddress}`)
     } else {
       console.error('Failed to join game:', result.error)
       setJoinError(result.error)
     }
-  }, [gameAddress, joinGame])
+  }, [gameAddress, joinGame, router])
 
   return {
     handleJoinGame,

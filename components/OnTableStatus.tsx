@@ -7,6 +7,8 @@ import { en } from '~/lib/dictionaries'
 import { GameState } from '~/lib/models/GameState'
 import { PokerGameState } from '~/lib/models/MovePokerGameSchema'
 import { cn } from '~/lib/utils'
+import { formatMist } from '~/lib/format-mist'
+import { SuiIcon } from './SuiIcon'
 
 interface Props {
   readonly game?: GameState
@@ -70,18 +72,18 @@ function getPhaseStyles(status: PokerGameState) {
 }
 
 export default function OnTableStatus({ game, loading }: Props) {
-  const actions = useGameActions(game?.id)
+  const actions = useGameActions()
 
   if (loading) {
     return (
       <motion.div
-        className='flex items-center justify-center p-8'
+        className="flex items-center justify-center p-8"
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
       >
         <motion.div
-          className='text-white'
+          className="text-white"
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 2, repeat: Infinity }}
         >
@@ -94,14 +96,14 @@ export default function OnTableStatus({ game, loading }: Props) {
   if (!game) {
     return (
       <motion.div
-        className='flex items-center justify-center p-4'
+        className="flex items-center justify-center p-4"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className='text-center'>
-          <div className='text-white text-lg mb-2'>{en.game.noGameLoaded}</div>
-          <div className='text-gray-400 text-sm'>
+        <div className="text-center">
+          <div className="text-white text-lg mb-2">{en.game.noGameLoaded}</div>
+          <div className="text-gray-400 text-sm">
             {en.game.joinOrCreateGame}
           </div>
         </div>
@@ -120,7 +122,7 @@ export default function OnTableStatus({ game, loading }: Props) {
 
   return (
     <motion.div
-      className='space-y-4'
+      className="space-y-4"
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.6, ease: 'easeOut' }}
@@ -129,43 +131,24 @@ export default function OnTableStatus({ game, loading }: Props) {
       <AnimatePresence>
         {isWaitingForPlayers && (
           <motion.div
-            className='flex justify-between items-center text-white'
+            className="grid grid-cols-2 text-white text-sm text-nowrap"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.5 }}
           >
-            <motion.div
-              className='text-sm'
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4, delay: 0.1 }}
-            >
-              <span className='text-gray-400'>{en.game.pot}</span>{' '}
-              <span className='font-bold text-green-400'>${game.pot}</span>
-            </motion.div>
-            <motion.div
-              className='text-sm'
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.2 }}
-            >
-              <span className='text-gray-400'>{en.game.currentBet}</span>{' '}
-              <span className='font-bold text-yellow-400'>
-                ${game.currentBet}
-              </span>
-            </motion.div>
-            <motion.div
-              className='text-sm'
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4, delay: 0.3 }}
-            >
-              <span className='text-gray-400'>{en.game.yourChips}</span>{' '}
-              <span className='font-bold text-blue-400'>
-                ${currentPlayer?.chips || 0}
-              </span>
-            </motion.div>
+            <span className="text-gray-400">{en.game.pot}</span>{' '}
+            <span className="font-bold text-green-400 text-right">
+              {formatMist(game.pot)} <SuiIcon />
+            </span>
+            <span className="text-gray-400">{en.game.currentBet}</span>{' '}
+            <span className="font-bold text-yellow-400 text-right">
+              {formatMist(game.currentBet)} <SuiIcon />
+            </span>
+            <span className="text-gray-400">{en.game.yourChips}</span>{' '}
+            <span className="font-bold text-blue-400 text-right">
+              {formatMist(currentPlayer?.chips)} <SuiIcon />
+            </span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -174,7 +157,7 @@ export default function OnTableStatus({ game, loading }: Props) {
       <AnimatePresence>
         {canStart && (
           <motion.div
-            className='text-center space-y-4'
+            className="text-center space-y-4"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
@@ -182,9 +165,9 @@ export default function OnTableStatus({ game, loading }: Props) {
           >
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
-                onClick={() => actions.startGame()}
+                onClick={() => actions.createGame()}
                 disabled={actions.isLoading}
-                className='bg-gradient-to-r from-green-500 to-emerald-700 text-white text-lg font-bold px-8 py-3 rounded-lg shadow-lg hover:from-green-400 hover:to-emerald-600 transition-all duration-200 disabled:opacity-50'
+                className="bg-gradient-to-r from-green-500 to-emerald-700 text-white text-lg font-bold px-8 py-3 rounded-lg shadow-lg hover:from-green-400 hover:to-emerald-600 transition-all duration-200 disabled:opacity-50"
               >
                 {actions.isLoading
                   ? en.game.status.starting
@@ -192,7 +175,7 @@ export default function OnTableStatus({ game, loading }: Props) {
               </Button>
             </motion.div>
             <motion.div
-              className='text-xs text-gray-400'
+              className="text-xs text-gray-400"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
@@ -207,7 +190,7 @@ export default function OnTableStatus({ game, loading }: Props) {
       <AnimatePresence>
         {game.status !== PokerGameState.WAITING_FOR_PLAYERS && (
           <motion.div
-            className='text-center'
+            className="text-center"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
@@ -215,7 +198,7 @@ export default function OnTableStatus({ game, loading }: Props) {
           >
             {!isMyTurn ? (
               <motion.div
-                className='text-gray-400 text-sm'
+                className="text-gray-400 text-sm"
                 animate={{ opacity: [0.5, 1, 0.5] }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
@@ -225,7 +208,7 @@ export default function OnTableStatus({ game, loading }: Props) {
               </motion.div>
             ) : (
               <motion.div
-                className='text-green-400 text-sm font-medium'
+                className="text-green-400 text-sm font-medium"
                 animate={{ scale: [1, 1.05, 1] }}
                 transition={{ duration: 1, repeat: Infinity }}
               >
@@ -238,7 +221,7 @@ export default function OnTableStatus({ game, loading }: Props) {
 
       {/* Game Phase Indicator */}
       <motion.div
-        className='text-center'
+        className="text-center"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}

@@ -14,10 +14,10 @@ interface Props {
 export default function AppProviders({ children }: Props) {
   return (
     <QueryClientProvider client={queryClient}>
-      <SuiClientProvider networks={networkConfig} defaultNetwork='testnet'>
+      <SuiClientProvider networks={networkConfig} defaultNetwork="testnet">
         <WalletProvider autoConnect>{children}</WalletProvider>
       </SuiClientProvider>
-      <ReactQueryDevtools initialIsOpen={true} />
+      <ReactQueryDevtools />
     </QueryClientProvider>
   )
 }

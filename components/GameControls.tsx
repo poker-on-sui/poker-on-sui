@@ -3,8 +3,12 @@ import React, { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
+import { Slider } from '~/components/ui/slider'
 import { useGameActions } from '~/lib/hooks/useGameActions'
 import { GameState } from '~/lib/models/GameState'
+import { formatMist } from '~/lib/format-mist'
+import { SuiIcon } from './SuiIcon'
+import { en } from '~/lib/dictionaries'
 
 interface Props {
   readonly game?: GameState
@@ -16,7 +20,7 @@ interface Props {
 export default function GameControls({ game, loading, address }: Props) {
   const [raiseAmount, setRaiseAmount] = useState(0)
   const [customBetAmount, setCustomBetAmount] = useState('')
-  const actions = useGameActions(game?.id)
+  const actions = useGameActions()
 
   const currentPlayer = !game ? undefined : game.players[game.currentPlayer]
   const isMyTurn = !currentPlayer ? false : currentPlayer.id === address
@@ -60,14 +64,14 @@ export default function GameControls({ game, loading, address }: Props) {
   if (loading) {
     return (
       <motion.div
-        className='bg-black/30 backdrop-blur-sm border border-white/20 rounded-lg p-6 shadow-2xl'
+        className="bg-black/30 backdrop-blur-sm border border-white/20 rounded-lg p-6 shadow-2xl"
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className='flex items-center justify-center'>
+        <div className="flex items-center justify-center">
           <motion.div
-            className='text-white'
+            className="text-white"
             animate={{ opacity: [0.5, 1, 0.5] }}
             transition={{ duration: 1.5, repeat: Infinity }}
           >
@@ -82,15 +86,17 @@ export default function GameControls({ game, loading, address }: Props) {
   if (!game) {
     return (
       <motion.div
-        className='bg-black/30 backdrop-blur-sm border border-white/20 rounded-lg p-6 shadow-2xl'
+        className="bg-black/30 backdrop-blur-sm border border-white/20 rounded-lg p-6 shadow-2xl"
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <div className='flex items-center justify-center'>
-          <div className='text-center text-gray-400'>
-            <div className='text-lg font-medium mb-2'>No Game Loaded</div>
-            <div className='text-sm'>Join or create a game to see controls</div>
+        <div className="flex items-center justify-center">
+          <div className="text-center text-gray-400">
+            <div className="text-lg font-medium mb-2">
+              {en.game.noGameLoaded}
+            </div>
+            <div className="text-sm">Join or create a game to see controls</div>
           </div>
         </div>
       </motion.div>
@@ -112,11 +118,6 @@ export default function GameControls({ game, loading, address }: Props) {
     }
   }
 
-  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setRaiseAmount(parseInt(e.target.value))
-    setCustomBetAmount('')
-  }
-
   const handleCustomBetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCustomBetAmount(e.target.value)
     setRaiseAmount(0)
@@ -124,57 +125,57 @@ export default function GameControls({ game, loading, address }: Props) {
 
   return (
     <motion.div
-      className='bg-black/30 backdrop-blur-sm border border-white/20 rounded-lg p-6 shadow-2xl'
+      className="bg-black/30 backdrop-blur-sm border border-white/20 rounded-lg p-6 shadow-2xl"
       initial={{ opacity: 0, y: 100 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, ease: 'easeOut' }}
     >
-      <div className='space-y-4'>
+      <div className="space-y-4">
         {/* Action Buttons */}
         <motion.div
-          className='flex gap-3'
+          className="flex gap-3"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
           <motion.div
-            className='flex-1'
+            className="flex-1"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
             <Button
-              variant='destructive'
-              size='lg'
+              variant="destructive"
+              size="lg"
               onClick={actions.fold}
               disabled={!isMyTurn}
-              className='w-full h-12 text-lg font-bold'
+              className="w-full h-12 text-lg font-bold"
             >
               Fold
             </Button>
           </motion.div>
 
           <motion.div
-            className='flex-1'
+            className="flex-1"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
             {callAmount > 0 ? (
               <Button
-                variant='outline'
-                size='lg'
+                variant="outline"
+                size="lg"
                 onClick={actions.call}
                 disabled={!isMyTurn || callAmount > (currentPlayer?.chips || 0)}
-                className='w-full h-12 text-lg font-bold border-blue-500 text-blue-400 hover:bg-blue-500/20'
+                className="w-full h-12 text-lg font-bold border-blue-500 text-blue-400 hover:bg-blue-500/20"
               >
-                Call ${callAmount}
+                Call {formatMist(callAmount)}
               </Button>
             ) : (
               <Button
-                variant='outline'
-                size='lg'
+                variant="outline"
+                size="lg"
                 onClick={actions.call}
                 disabled={!isMyTurn}
-                className='w-full h-12 text-lg font-bold border-green-500 text-green-400 hover:bg-green-500/20'
+                className="w-full h-12 text-lg font-bold border-green-500 text-green-400 hover:bg-green-500/20"
               >
                 Check
               </Button>
@@ -182,16 +183,16 @@ export default function GameControls({ game, loading, address }: Props) {
           </motion.div>
 
           <motion.div
-            className='flex-1'
+            className="flex-1"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
             <Button
-              variant='default'
-              size='lg'
+              variant="default"
+              size="lg"
               onClick={handleRaise}
               disabled={!isMyTurn || maxRaise < minRaise}
-              className='w-full h-12 text-lg font-bold bg-orange-600 hover:bg-orange-700 text-white'
+              className="w-full h-12 text-lg font-bold bg-orange-600 hover:bg-orange-700 text-white"
             >
               {game.currentBet > 0 ? 'Raise' : 'Bet'}
             </Button>
@@ -202,71 +203,66 @@ export default function GameControls({ game, loading, address }: Props) {
         <AnimatePresence>
           {isMyTurn && maxRaise >= minRaise && (
             <motion.div
-              className='space-y-3'
+              className="space-y-3"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.5, ease: 'easeInOut' }}
             >
-              <div className='flex items-center justify-between text-sm text-gray-400'>
-                <span>Min: ${minRaise}</span>
-                <span>Max: ${maxRaise}</span>
+              <div className="flex items-center justify-between text-sm text-gray-400">
+                <span>
+                  Min: {formatMist(minRaise)} <SuiIcon />
+                </span>
+                <span>
+                  Max: {formatMist(maxRaise)} <SuiIcon />
+                </span>
               </div>
 
               {/* Raise Slider */}
-              <div className='space-y-2'>
-                <input
-                  type='range'
+              <div className="space-y-2">
+                <Slider
                   min={minRaise}
                   max={maxRaise}
-                  value={raiseAmount || minRaise}
-                  onChange={handleSliderChange}
-                  className='w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider'
-                  style={{
-                    background: `linear-gradient(to right, #f59e0b 0%, #f59e0b ${
-                      ((raiseAmount || minRaise - minRaise) /
-                        (maxRaise - minRaise)) *
-                      100
-                    }%, #374151 ${
-                      ((raiseAmount || minRaise - minRaise) /
-                        (maxRaise - minRaise)) *
-                      100
-                    }%, #374151 100%)`,
+                  value={[raiseAmount || minRaise]}
+                  onValueChange={value => {
+                    setRaiseAmount(value[0])
+                    setCustomBetAmount('')
                   }}
+                  className="w-full [&_[data-slot=slider-track]]:bg-gray-700 [&_[data-slot=slider-range]]:bg-orange-500 [&_[data-slot=slider-thumb]]:bg-orange-500 [&_[data-slot=slider-thumb]]:border-white"
                 />
                 {raiseAmount > 0 && (
                   <motion.div
-                    className='text-center text-white font-medium'
+                    className="text-center text-white font-medium"
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.3 }}
                   >
-                    ${raiseAmount}
+                    {formatMist(raiseAmount)} <SuiIcon />
                   </motion.div>
                 )}
               </div>
 
               {/* Custom Bet Input */}
               <motion.div
-                className='flex gap-2 items-center'
+                className="flex gap-2 items-center"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.4, delay: 0.1 }}
               >
                 <Input
-                  type='number'
+                  type="number"
                   placeholder={`Custom amount (${minRaise}-${maxRaise})`}
                   value={customBetAmount}
                   onChange={handleCustomBetChange}
                   min={minRaise}
                   max={maxRaise}
-                  className='flex-1 bg-gray-800/50 border-gray-600 text-white placeholder-gray-400'
+                  className="flex-1 bg-gray-800/50 border-gray-600 text-white placeholder-gray-400"
                 />
               </motion.div>
 
               {/* Quick Bet Buttons */}
               <motion.div
-                className='flex gap-2'
+                className="flex gap-2"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
@@ -279,7 +275,7 @@ export default function GameControls({ game, loading, address }: Props) {
                 ].map((btn, index) => (
                   <motion.div
                     key={btn.label}
-                    className='flex-1'
+                    className="flex-1"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     initial={{ opacity: 0, y: 10 }}
@@ -287,13 +283,13 @@ export default function GameControls({ game, loading, address }: Props) {
                     transition={{ duration: 0.3, delay: 0.3 + index * 0.1 }}
                   >
                     <Button
-                      variant='outline'
-                      size='sm'
+                      variant="outline"
+                      size="sm"
                       onClick={() => {
                         setRaiseAmount(btn.value)
                         setCustomBetAmount('')
                       }}
-                      className='w-full border-gray-600 text-gray-300 hover:bg-gray-700'
+                      className="w-full border-gray-600 text-gray-300 hover:bg-gray-700"
                     >
                       {btn.label}
                     </Button>
@@ -304,30 +300,6 @@ export default function GameControls({ game, loading, address }: Props) {
           )}
         </AnimatePresence>
       </div>
-
-      {/* CSS for custom slider styling */}
-      <style jsx>{`
-        .slider::-webkit-slider-thumb {
-          appearance: none;
-          height: 20px;
-          width: 20px;
-          border-radius: 50%;
-          background: #f59e0b;
-          cursor: pointer;
-          border: 2px solid #ffffff;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .slider::-moz-range-thumb {
-          height: 20px;
-          width: 20px;
-          border-radius: 50%;
-          background: #f59e0b;
-          cursor: pointer;
-          border: 2px solid #ffffff;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-      `}</style>
     </motion.div>
   )
 }

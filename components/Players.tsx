@@ -15,6 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '~/components/ui/popover'
+import { formatMist } from '~/lib/format-mist'
 
 interface Props {
   readonly players: Player[]
@@ -252,7 +253,7 @@ const PlayerBlock: React.FC<PlayerAvatarProps> = ({
             ease: 'easeOut',
           }}
         >
-          ${player.chips}
+          ${formatMist(player.chips)}
         </motion.div>
 
         {/* Current bet */}

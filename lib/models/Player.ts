@@ -6,7 +6,6 @@ export interface Player {
   cards: string[]
   isFolded: boolean
   isActive: boolean
-  hasActed: boolean
   currentBet: number
   isDealer: boolean
   isSmallBlind: boolean

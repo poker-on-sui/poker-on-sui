@@ -2,29 +2,27 @@
 import React from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'motion/react'
+import { useAccounts } from '@mysten/dapp-kit'
 
 import GameControls from './GameControls'
 import OnTableStatus from './OnTableStatus'
 import Players from './Players'
 import tablePng from '~/assets/table.png'
-import * as mocks from '~/lib/mock/game-state.mock'
+// import * as mocks from '~/lib/mock/game-state.mock'
 import iconPng from '~/app/icon.png'
 import suiIconSvg from '~/assets/sui-icon-white.svg'
 import { en } from '~/lib/dictionaries'
 import { CommunityCards } from './CommunityCards'
-import { useAccounts } from '@mysten/dapp-kit'
 import WalletConnectionPrompt from './WalletConnectionPrompt'
-// import { useGameTable } from '~/lib/hooks/useGameTable'
+import { useGameTable } from '~/lib/hooks/useGameTable'
 
 interface Props {
   readonly gameAddress?: string
 }
 
-export default function GameTable({}: Props) {
+export default function GameTable({ gameAddress }: Props) {
   const [account] = useAccounts()
-  // const { game, isLoading } = useGameTable(gameAddress)
-  const game = mocks.gameOverMultipleWinners
-  const isLoading = false // Simulating loading state for the example
+  const { game, isLoading } = useGameTable(gameAddress)
 
   return (
     <AnimatePresence mode="wait">
@@ -117,7 +115,7 @@ export default function GameTable({}: Props) {
             />
 
             {/* Community cards */}
-            <CommunityCards cards={game.communityCards} />
+            <CommunityCards cards={game?.communityCards} />
 
             {/* Game content will go here */}
             <div

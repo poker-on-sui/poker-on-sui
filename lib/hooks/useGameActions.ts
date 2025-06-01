@@ -7,34 +7,57 @@ import { Transaction } from '@mysten/sui/transactions'
 import { useCallback, useState } from 'react'
 import { useNetworkVariable } from '~/lib/networkConfig'
 import { getDictionary } from '~/lib/dictionaries'
-import { getGameInfo } from '../queries/getGameInfo'
+import { getGameInfo, useGameInfoQuery } from '../queries/getGameInfo'
 import { ok, failed, Result } from '~/lib/result'
-import { useRouter } from 'next/navigation'
+import { PokerGameState } from '../models/MovePokerGameSchema'
 
 const dict = getDictionary()
+
+const DEFAULT_BUY_IN = 100_000_000 // 0.1 SUI
 
 export function useGameActions() {
   const [account] = useAccounts()
   const suiClient = useSuiClient()
-  const { mutateAsync } = useSignAndExecuteTransaction({
-    execute: async ({ bytes, signature }) =>
-      await suiClient.executeTransactionBlock({
-        transactionBlock: bytes,
-        signature,
-        options: { showRawEffects: true, showObjectChanges: true },
-      }),
-  })
+  const [currentGameAddr, setCurrentGameAddr] = useState<string | undefined>()
+  const { data: currentGame } = useGameInfoQuery(currentGameAddr)
+  const { mutateAsync: mutateWithObjectChangesAsync } =
+    useSignAndExecuteTransaction({
+      execute: async ({ bytes, signature }) =>
+        await suiClient.executeTransactionBlock({
+          transactionBlock: bytes,
+          signature,
+          options: { showRawEffects: true, showObjectChanges: true },
+        }),
+    })
+  const { mutateAsync } = useSignAndExecuteTransaction()
   const pokerPackageId = useNetworkVariable('pokerPackageId')
   const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
 
+  const executeTransactionWithObjectChanges = useCallback(
+    async (transaction: Transaction) => {
+      setIsLoading(true)
+      try {
+        const result = await mutateWithObjectChangesAsync({ transaction })
+        console.log('Transaction executed:', result)
+        return ok(result.objectChanges ?? [])
+      } catch (error) {
+        console.error('Transaction error:', error)
+        return failed(
+          error instanceof Error ? error.message : 'Unknown error occurred'
+        )
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [mutateWithObjectChangesAsync]
+  )
   const executeTransaction = useCallback(
     async (transaction: Transaction) => {
       setIsLoading(true)
       try {
         const result = await mutateAsync({ transaction })
         console.log('Transaction executed:', result)
-        return ok(result.objectChanges ?? [])
+        return ok(result.digest)
       } catch (error) {
         console.error('Transaction error:', error)
         return failed(
@@ -48,19 +71,20 @@ export function useGameActions() {
   )
 
   const createGame = useCallback(
-    async (buyIn: number) => {
+    async (buyIn: number = DEFAULT_BUY_IN) => {
       try {
-        const transaction = new Transaction()
+        const tx = new Transaction()
 
         // Convert buyIn to MIST (1 SUI = 10^9 MIST)
         const buyInMist = Math.floor(buyIn * 1_000_000_000)
+        const [coin] = tx.splitCoins(tx.gas, [buyInMist])
 
-        transaction.moveCall({
+        tx.moveCall({
           target: `${pokerPackageId}::game::create_game`,
-          arguments: [transaction.pure.u64(buyInMist)],
+          arguments: [coin],
         })
 
-        const result = await executeTransaction(transaction)
+        const result = await executeTransactionWithObjectChanges(tx)
         if (result.ok) {
           const createdObject = result.data
             .filter(obj => obj.type === 'created')
@@ -78,7 +102,7 @@ export function useGameActions() {
         )
       }
     },
-    [pokerPackageId, executeTransaction]
+    [pokerPackageId, executeTransactionWithObjectChanges]
   )
 
   const joinGame = useCallback(
@@ -89,26 +113,23 @@ export function useGameActions() {
       const game = await getGameInfo(gameAddr, suiClient)
       if (!game) return failed(dict.errors.gameNotFound)
 
-      if (game.players.some(p => p.fields.addr === account.address)) {
-        console.log('Already joined, redirecting to game')
-        router.push(`/game?addr=${gameAddr}`)
-        return ok()
-      }
+      setCurrentGameAddr(gameAddr)
+
+      if (game.players.some(p => p.id === account.address)) return ok()
 
       try {
         const tx = new Transaction()
-        const paymentMist = Math.floor(game.buy_in)
+        const paymentMist = Math.floor(game.buyInAmount)
         const [coin] = tx.splitCoins(tx.gas, [paymentMist])
         tx.moveCall({
           target: `${pokerPackageId}::game::join_game`,
           arguments: [tx.object(gameAddr), coin],
         })
 
-        const result = await executeTransaction(tx)
+        const result = await executeTransactionWithObjectChanges(tx)
         if (!result.ok) return result
 
         console.log('Joined game successfully:', gameAddr)
-        router.push(`/game?addr=${gameAddr}`)
         return ok()
       } catch (error) {
         console.error('Join game error:', error)
@@ -117,7 +138,7 @@ export function useGameActions() {
         )
       }
     },
-    [account, suiClient, router, pokerPackageId, executeTransaction]
+    [account, suiClient, pokerPackageId, executeTransactionWithObjectChanges]
   )
 
   const startGame = useCallback(
@@ -131,7 +152,7 @@ export function useGameActions() {
           arguments: [tx.object(gameAddr), tx.object.random()],
         })
 
-        const result = await executeTransaction(tx)
+        const result = await executeTransactionWithObjectChanges(tx)
         if (!result.ok) return failed(result.error)
         return ok()
       } catch (error) {
@@ -141,15 +162,96 @@ export function useGameActions() {
         )
       }
     },
-    [pokerPackageId, executeTransaction]
+    [pokerPackageId, executeTransactionWithObjectChanges]
   )
 
   // TODO: Implement fold, check, call, bet, raise actions
-  const fold = useCallback(() => {}, [])
-  const check = useCallback(() => {}, [])
-  const call = useCallback(() => {}, [])
-  const bet = useCallback((amount: number) => {}, [])
-  const raise = useCallback((amount: number) => {}, [])
+  const fold = useCallback(() => {
+    if (!currentGame) return failed(dict.errors.gameNotFound)
+    if (!account) return failed(dict.errors.walletNotConnected)
+    if (
+      currentGame.status === PokerGameState.WAITING_FOR_PLAYERS ||
+      currentGame.status === PokerGameState.GAME_OVER
+    )
+      return failed(dict.errors.gameNotFound)
+
+    const tx = new Transaction()
+    tx.moveCall({
+      target: `${pokerPackageId}::game::fold`,
+      arguments: [tx.object(currentGame.id)],
+    })
+    return executeTransaction(tx)
+  }, [account, currentGame, executeTransaction, pokerPackageId])
+  const check = useCallback(() => {
+    if (!currentGame) return failed(dict.errors.gameNotFound)
+    if (!account) return failed(dict.errors.walletNotConnected)
+    if (
+      currentGame.status === PokerGameState.WAITING_FOR_PLAYERS ||
+      currentGame.status === PokerGameState.GAME_OVER
+    )
+      return failed(dict.errors.gameNotFound)
+
+    const tx = new Transaction()
+    tx.moveCall({
+      target: `${pokerPackageId}::game::check`,
+      arguments: [tx.object(currentGame.id)],
+    })
+    return executeTransaction(tx)
+  }, [account, currentGame, executeTransaction, pokerPackageId])
+  const call = useCallback(() => {
+    if (!currentGame) return failed(dict.errors.gameNotFound)
+    if (!account) return failed(dict.errors.walletNotConnected)
+    if (
+      currentGame.status === PokerGameState.WAITING_FOR_PLAYERS ||
+      currentGame.status === PokerGameState.GAME_OVER
+    )
+      return failed(dict.errors.gameNotFound)
+
+    const tx = new Transaction()
+    tx.moveCall({
+      target: `${pokerPackageId}::game::call`,
+      arguments: [tx.object(currentGame.id)],
+    })
+    return executeTransaction(tx)
+  }, [account, currentGame, executeTransaction, pokerPackageId])
+  const bet = useCallback(
+    (amount: number) => {
+      if (!currentGame) return failed(dict.errors.gameNotFound)
+      if (!account) return failed(dict.errors.walletNotConnected)
+      if (
+        currentGame.status === PokerGameState.WAITING_FOR_PLAYERS ||
+        currentGame.status === PokerGameState.GAME_OVER
+      )
+        return failed(dict.errors.gameNotFound)
+
+      const tx = new Transaction()
+      tx.moveCall({
+        target: `${pokerPackageId}::game::bet`,
+        arguments: [tx.object(currentGame.id), tx.pure.u64(amount)],
+      })
+      return executeTransaction(tx)
+    },
+    [account, currentGame, executeTransaction, pokerPackageId]
+  )
+  const raise = useCallback(
+    (amount: number) => {
+      if (!currentGame) return failed(dict.errors.gameNotFound)
+      if (!account) return failed(dict.errors.walletNotConnected)
+      if (
+        currentGame.status === PokerGameState.WAITING_FOR_PLAYERS ||
+        currentGame.status === PokerGameState.GAME_OVER
+      )
+        return failed(dict.errors.gameNotFound)
+
+      const tx = new Transaction()
+      tx.moveCall({
+        target: `${pokerPackageId}::game::raise`,
+        arguments: [tx.object(currentGame.id), tx.pure.u64(amount)],
+      })
+      return executeTransaction(tx)
+    },
+    [account, currentGame, executeTransaction, pokerPackageId]
+  )
 
   return {
     createGame,

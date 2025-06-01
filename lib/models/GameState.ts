@@ -12,4 +12,5 @@ export interface GameState {
   bigBlind: number
   dealerPosition: number
   currentPlayer: number
+  buyInAmount: number
 }
