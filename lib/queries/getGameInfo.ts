@@ -2,7 +2,10 @@ import { useSuiClientQuery } from '@mysten/dapp-kit'
 import { SuiClient } from '@mysten/sui/client'
 import Haikunator from 'haikunator'
 
-import { MovePokerGameSchema } from '../models/MovePokerGameSchema'
+import {
+  MovePokerGameSchema,
+  PokerCardSchema,
+} from '../models/MovePokerGameSchema'
 import { GameState } from '../models/GameState'
 import { Player } from '../models/Player'
 import { cardNameFromSuitAndValue } from '~/assets/cards'
@@ -43,6 +46,11 @@ export const useGameInfoQuery = (gameAddress?: string) =>
     }
   )
 
+const cardDataMapper = (card: PokerCardSchema) => {
+  const { suit, value } = card.fields
+  return cardNameFromSuitAndValue(suit, value)
+}
+
 function parseState(data: MovePokerGameSchema): GameState {
   return {
     id: data.id.id,
@@ -64,10 +72,7 @@ function parseState(data: MovePokerGameSchema): GameState {
           id: p.addr,
           name: new Haikunator({ seed: p.addr }).haikunate(),
           chips: p.balance,
-          cards: p.cards.map(card => {
-            const { suit, value } = card.fields
-            return cardNameFromSuitAndValue(suit, value)
-          }),
+          cards: p.cards.map(cardDataMapper),
           isFolded: p.is_folded,
           isActive: !p.is_folded && !p.is_all_in, // TODO: Determine active status based on game state
           currentBet: p.current_bet,
@@ -77,7 +82,7 @@ function parseState(data: MovePokerGameSchema): GameState {
           position: playerPos,
         }
       }),
-    communityCards: data.community_cards,
+    communityCards: data.community_cards.map(cardDataMapper),
     pot: data.pot,
     currentBet: data.current_bet,
     smallBlind: data.small_blind,

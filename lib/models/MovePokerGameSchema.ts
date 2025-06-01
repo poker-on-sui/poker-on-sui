@@ -11,7 +11,7 @@ export enum PokerGameState {
   GAME_OVER = 7,
 }
 
-const PokerCardSchema = z.object({
+export const PokerCardSchema = z.object({
   fields: z.object({
     suit: z.coerce.number(),
     value: z.coerce.number(),
@@ -21,7 +21,7 @@ const PokerCardSchema = z.object({
 export const MovePokerGameSchema = z.object({
   big_blind: z.coerce.number(),
   buy_in: z.coerce.number(),
-  community_cards: z.array(z.string()),
+  community_cards: z.array(PokerCardSchema),
   current_bet: z.coerce.number(),
   current_player: z.coerce.number(),
   dealer_position: z.coerce.number(),
@@ -48,3 +48,4 @@ export const MovePokerGameSchema = z.object({
   state: z.nativeEnum(PokerGameState),
 })
 export type MovePokerGameSchema = z.infer<typeof MovePokerGameSchema>
+export type PokerCardSchema = z.infer<typeof PokerCardSchema>
