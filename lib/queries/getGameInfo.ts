@@ -69,7 +69,7 @@ function parseState(data: MovePokerGameSchema): GameState {
             return cardNameFromSuitAndValue(suit, value)
           }),
           isFolded: p.is_folded,
-          isActive: p.is_folded || p.is_all_in, // TODO: Determine active status based on game state
+          isActive: !p.is_folded && !p.is_all_in, // TODO: Determine active status based on game state
           currentBet: p.current_bet,
           isDealer: data.dealer_position === playerPos,
           isSmallBlind: smallBlindPosition === playerPos,

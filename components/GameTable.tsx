@@ -111,7 +111,7 @@ export default function GameTable({ gameAddr }: Props) {
             {/* Players positioned around the table */}
             <Players
               players={game?.players || []}
-              currentPlayerId={game?.players?.find(p => p.isActive)?.id}
+              currentPlayerId={game?.players?.[game.currentPlayer]?.id}
             />
 
             {/* Community cards */}
