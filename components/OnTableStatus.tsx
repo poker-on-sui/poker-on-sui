@@ -1,5 +1,6 @@
 'use client'
 import React from 'react'
+import { motion, AnimatePresence } from 'motion/react'
 import { Button } from '~/components/ui/button'
 import { useGameActions } from '~/lib/hooks/useGameActions'
 import { en } from '~/lib/dictionaries'
@@ -73,22 +74,38 @@ export default function OnTableStatus({ game, loading }: Props) {
 
   if (loading) {
     return (
-      <div className='flex items-center justify-center p-8'>
-        <div className='text-white'>{en.game.loadingGame}</div>
-      </div>
+      <motion.div
+        className='flex items-center justify-center p-8'
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <motion.div
+          className='text-white'
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          {en.game.loadingGame}
+        </motion.div>
+      </motion.div>
     )
   }
 
   if (!game) {
     return (
-      <div className='flex items-center justify-center p-4'>
+      <motion.div
+        className='flex items-center justify-center p-4'
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className='text-center'>
           <div className='text-white text-lg mb-2'>{en.game.noGameLoaded}</div>
           <div className='text-gray-400 text-sm'>
             {en.game.joinOrCreateGame}
           </div>
         </div>
-      </div>
+      </motion.div>
     )
   }
 
@@ -102,68 +119,146 @@ export default function OnTableStatus({ game, loading }: Props) {
     game.players.length >= 2
 
   return (
-    <div className='space-y-4'>
+    <motion.div
+      className='space-y-4'
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.6, ease: 'easeOut' }}
+    >
       {/* Game Info */}
-      {isWaitingForPlayers && (
-        <div className='flex justify-between items-center text-white'>
-          <div className='text-sm'>
-            <span className='text-gray-400'>{en.game.pot}</span>{' '}
-            <span className='font-bold text-green-400'>${game.pot}</span>
-          </div>
-          <div className='text-sm'>
-            <span className='text-gray-400'>{en.game.currentBet}</span>{' '}
-            <span className='font-bold text-yellow-400'>
-              ${game.currentBet}
-            </span>
-          </div>
-          <div className='text-sm'>
-            <span className='text-gray-400'>{en.game.yourChips}</span>{' '}
-            <span className='font-bold text-blue-400'>
-              ${currentPlayer?.chips || 0}
-            </span>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {isWaitingForPlayers && (
+          <motion.div
+            className='flex justify-between items-center text-white'
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.5 }}
+          >
+            <motion.div
+              className='text-sm'
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4, delay: 0.1 }}
+            >
+              <span className='text-gray-400'>{en.game.pot}</span>{' '}
+              <span className='font-bold text-green-400'>${game.pot}</span>
+            </motion.div>
+            <motion.div
+              className='text-sm'
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+            >
+              <span className='text-gray-400'>{en.game.currentBet}</span>{' '}
+              <span className='font-bold text-yellow-400'>
+                ${game.currentBet}
+              </span>
+            </motion.div>
+            <motion.div
+              className='text-sm'
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4, delay: 0.3 }}
+            >
+              <span className='text-gray-400'>{en.game.yourChips}</span>{' '}
+              <span className='font-bold text-blue-400'>
+                ${currentPlayer?.chips || 0}
+              </span>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Able to start Game UI */}
-      {canStart && (
-        <div className='text-center space-y-4'>
-          <Button
-            onClick={() => actions.startGame()}
-            disabled={actions.isLoading}
-            className='bg-gradient-to-r from-green-500 to-emerald-700 text-white text-lg font-bold px-8 py-3 rounded-lg shadow-lg hover:from-green-400 hover:to-emerald-600 transition-all duration-200 disabled:opacity-50'
+      <AnimatePresence>
+        {canStart && (
+          <motion.div
+            className='text-center space-y-4'
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.5, ease: 'backOut' }}
           >
-            {actions.isLoading ? en.game.status.starting : en.game.startGame}
-          </Button>
-          <div className='text-xs text-gray-400'>
-            {game.players.length} {en.game.playersJoined}
-          </div>
-        </div>
-      )}
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                onClick={() => actions.startGame()}
+                disabled={actions.isLoading}
+                className='bg-gradient-to-r from-green-500 to-emerald-700 text-white text-lg font-bold px-8 py-3 rounded-lg shadow-lg hover:from-green-400 hover:to-emerald-600 transition-all duration-200 disabled:opacity-50'
+              >
+                {actions.isLoading
+                  ? en.game.status.starting
+                  : en.game.startGame}
+              </Button>
+            </motion.div>
+            <motion.div
+              className='text-xs text-gray-400'
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              {game.players.length} {en.game.playersJoined}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Player Status */}
-      {game.status !== PokerGameState.WAITING_FOR_PLAYERS && (
-        <div className='text-center'>
-          {!isMyTurn ? (
-            <div className='text-gray-400 text-sm'>
-              {en.game.waitingFor} {currentPlayer?.name || en.game.otherPlayer}
-              ...
-            </div>
-          ) : (
-            <div className='text-green-400 text-sm font-medium'>
-              {en.game.yourTurn} {currentPlayer?.name}
-            </div>
-          )}
-        </div>
-      )}
+      <AnimatePresence>
+        {game.status !== PokerGameState.WAITING_FOR_PLAYERS && (
+          <motion.div
+            className='text-center'
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.5 }}
+          >
+            {!isMyTurn ? (
+              <motion.div
+                className='text-gray-400 text-sm'
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                {en.game.waitingFor}{' '}
+                {currentPlayer?.name || en.game.otherPlayer}
+                ...
+              </motion.div>
+            ) : (
+              <motion.div
+                className='text-green-400 text-sm font-medium'
+                animate={{ scale: [1, 1.05, 1] }}
+                transition={{ duration: 1, repeat: Infinity }}
+              >
+                {en.game.yourTurn} {currentPlayer?.name}
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Game Phase Indicator */}
-      <div className='text-center'>
+      <motion.div
+        className='text-center'
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+      >
         {(() => {
           const phaseStyles = getPhaseStyles(game.status)
           return (
-            <div
+            <motion.div
               className={`inline-flex items-center px-3 py-1 rounded-full ${phaseStyles.bg} border ${phaseStyles.border}`}
+              whileHover={{ scale: 1.05 }}
+              animate={{
+                boxShadow: [
+                  '0 0 0 0 rgba(255, 255, 255, 0.4)',
+                  '0 0 0 10px rgba(255, 255, 255, 0)',
+                  '0 0 0 0 rgba(255, 255, 255, 0)',
+                ],
+              }}
+              transition={{
+                boxShadow: { duration: 2, repeat: Infinity, ease: 'easeInOut' },
+              }}
             >
               <span className={cn(phaseStyles.text, 'text-sm font-medium')}>
                 {game.status === PokerGameState.PRE_FLOP
@@ -180,10 +275,10 @@ export default function OnTableStatus({ game, loading }: Props) {
                   ? en.game.status.finished
                   : en.game.status.waitingForPlayers}
               </span>
-            </div>
+            </motion.div>
           )
         })()}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }

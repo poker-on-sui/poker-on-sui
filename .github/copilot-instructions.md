@@ -28,3 +28,4 @@ a SUI blockchain smart contract. The game supports 2-10 players in a session.
 - Use components from `@shadcn/ui` for UI elements whenever possible
 - Use `motion/react` for animations between component state whenever possible
 - use `AnimatePresence` from `motion/react` to handle component unmounting animations
+- Code generated should adhere to to formatting rules defined in `.prettierrc` file
