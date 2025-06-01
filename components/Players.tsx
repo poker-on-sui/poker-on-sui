@@ -16,6 +16,7 @@ import {
   PopoverTrigger,
 } from '~/components/ui/popover'
 import { formatMist } from '~/lib/format-mist'
+import { useAccounts } from '@mysten/dapp-kit'
 
 interface Props {
   readonly players: Player[]
@@ -27,6 +28,7 @@ interface PlayerAvatarProps {
   readonly player: Player
   readonly position: { x: number; y: number; rotation: number }
   readonly isCurrentPlayer: boolean
+  readonly isSelf: boolean
   readonly index: number
 }
 
@@ -34,6 +36,7 @@ const PlayerBlock: React.FC<PlayerAvatarProps> = ({
   player,
   position,
   isCurrentPlayer,
+  isSelf,
   index,
 }) => {
   // Generate a mock address for demo purposes
@@ -136,7 +139,15 @@ const PlayerBlock: React.FC<PlayerAvatarProps> = ({
             side="top"
             align="center"
           >
-            <div className="text-sm font-bold mb-2">{player.name}</div>
+            <div
+              className={cn(
+                'text-sm font-bold mb-2',
+                isSelf && 'text-blue-500'
+              )}
+            >
+              {player.name}
+              {!isSelf && <span className="text-xl"> ⚔</span>}
+            </div>
             <div className="text-xs space-y-1">
               <div>
                 {en.game.address} {playerAddress.slice(0, 8)}...
@@ -210,9 +221,9 @@ const PlayerBlock: React.FC<PlayerAvatarProps> = ({
         </Popover>
 
         {/* Indicator badges */}
-        <div className="absolute -top-1 -right-1 flex flex-col gap-0.5">
+        <div className="absolute -top-1 -right-1 flex flex-col gap-0.5 pointer-events-none">
           {player.isDealer && (
-            <div className="w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-xs text-white font-bold">
+            <div className="pointer- w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-xs text-white font-bold">
               D
             </div>
           )}
@@ -229,48 +240,25 @@ const PlayerBlock: React.FC<PlayerAvatarProps> = ({
         </div>
 
         {/* Player name */}
-        <motion.div
-          className="absolute top-14 left-1/2 transform -translate-x-1/2 text-xs text-white bg-black bg-opacity-50 px-2 py-1 rounded whitespace-nowrap"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            duration: 0.4,
-            delay: 0.9 + 0.1 * index,
-            ease: 'easeOut',
-          }}
+        <div
+          className={cn(
+            'absolute top-14 left-1/2 transform -translate-x-1/2 text-xs text-white bg-black/50 px-2 py-1 rounded whitespace-nowrap',
+            isSelf ? 'bg-blue-500/70' : ''
+          )}
         >
           {player.name}
-        </motion.div>
+        </div>
 
         {/* Chips count */}
-        <motion.div
-          className="absolute top-20 left-1/2 transform -translate-x-1/2 text-xs text-yellow-400 font-bold whitespace-nowrap"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{
-            duration: 0.4,
-            delay: 1.0 + 0.1 * index,
-            ease: 'easeOut',
-          }}
-        >
+        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 text-xs text-yellow-400 font-bold whitespace-nowrap">
           ${formatMist(player.chips)}
-        </motion.div>
+        </div>
 
         {/* Current bet */}
         {player.currentBet > 0 && (
-          <motion.div
-            className="absolute -left-8 top-1/2 transform -translate-y-1/2 bg-yellow-500 text-black px-2 py-1 rounded text-xs font-bold"
-            initial={{ opacity: 0, x: -20, scale: 0.8 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
-            transition={{
-              duration: 0.5,
-              delay: 1.1 + 0.1 * index,
-              ease: 'backOut',
-            }}
-            whileHover={{ scale: 1.1 }}
-          >
+          <div className="pointer-events-none absolute -left-10 top-1/2 transform -translate-y-1/2 bg-yellow-500 text-black px-2 py-1 rounded text-xs font-bold">
             {formatMist(player.currentBet)}
-          </motion.div>
+          </div>
         )}
       </motion.div>
     </div>
@@ -279,6 +267,7 @@ const PlayerBlock: React.FC<PlayerAvatarProps> = ({
 
 // Main Players component
 export default function Players({ players, currentPlayerId }: Props) {
+  const [account] = useAccounts()
   return (
     <>
       {players.map((player, i) => {
@@ -289,6 +278,7 @@ export default function Players({ players, currentPlayerId }: Props) {
             player={player}
             position={{ x, y, rotation }}
             isCurrentPlayer={player.id === currentPlayerId}
+            isSelf={player.id === account?.address}
             index={i}
           />
         )
