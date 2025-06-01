@@ -76,6 +76,7 @@ export const waitingForPlayersEmpty: GameState = {
   bigBlind: 50,
   dealerPosition: 0,
   currentPlayer: 0,
+  buyInAmount: 1000, // Default buy-in amount
 }
 
 export const waitingForPlayersOnePlayer: GameState = {
@@ -89,6 +90,7 @@ export const waitingForPlayersOnePlayer: GameState = {
   bigBlind: 50,
   dealerPosition: 0,
   currentPlayer: 0,
+  buyInAmount: 1000, // Default buy-in amount
 }
 
 export const waitingForPlayersTwoPlayers: GameState = {
@@ -102,6 +104,7 @@ export const waitingForPlayersTwoPlayers: GameState = {
   bigBlind: 50,
   dealerPosition: 0,
   currentPlayer: 0,
+  buyInAmount: 1000, // Default buy-in amount
 }
 
 // 2. PRE_FLOP states
@@ -119,6 +122,7 @@ export const preFlopTwoPlayers: GameState = {
   bigBlind: 50,
   dealerPosition: 0,
   currentPlayer: 0,
+  buyInAmount: 1000, // Default buy-in amount
 }
 
 export const preFlopFourPlayers: GameState = {
@@ -135,6 +139,7 @@ export const preFlopFourPlayers: GameState = {
   bigBlind: 50,
   dealerPosition: 0,
   currentPlayer: 3,
+  buyInAmount: 1000, // Default buy-in amount
 }
 
 export const preFlopWithRaises: GameState = {
@@ -152,6 +157,7 @@ export const preFlopWithRaises: GameState = {
   bigBlind: 50,
   dealerPosition: 0,
   currentPlayer: 1,
+  buyInAmount: 1000, // Default buy-in amount
 }
 
 export const preFlopWithFolds: GameState = {
@@ -169,6 +175,7 @@ export const preFlopWithFolds: GameState = {
   bigBlind: 50,
   dealerPosition: 0,
   currentPlayer: 2,
+  buyInAmount: 1000, // Default buy-in amount
 }
 
 // 3. FLOP states
@@ -186,6 +193,7 @@ export const flopTwoPlayers: GameState = {
   bigBlind: 50,
   dealerPosition: 0,
   currentPlayer: 1,
+  buyInAmount: 1000, // Default buy-in amount
 }
 
 export const flopFourPlayersWithBetting: GameState = {
@@ -202,6 +210,7 @@ export const flopFourPlayersWithBetting: GameState = {
   bigBlind: 50,
   dealerPosition: 0,
   currentPlayer: 2,
+  buyInAmount: 1000, // Default buy-in amount
 }
 
 export const flopSixPlayersWithFolds: GameState = {
@@ -219,6 +228,7 @@ export const flopSixPlayersWithFolds: GameState = {
   bigBlind: 50,
   dealerPosition: 0,
   currentPlayer: 0,
+  buyInAmount: 1000, // Default buy-in amount
 }
 
 // 4. TURN states
@@ -237,6 +247,7 @@ export const turnTwoPlayersAllIn: GameState = {
   bigBlind: 50,
   dealerPosition: 0,
   currentPlayer: 0,
+  buyInAmount: 1000, // Default buy-in amount
 }
 
 export const turnFourPlayersActive: GameState = {
@@ -253,6 +264,7 @@ export const turnFourPlayersActive: GameState = {
   bigBlind: 50,
   dealerPosition: 0,
   currentPlayer: 3,
+  buyInAmount: 1000, // Default buy-in amount
 }
 
 // 5. RIVER states
@@ -270,6 +282,7 @@ export const riverTwoPlayersShowdown: GameState = {
   bigBlind: 50,
   dealerPosition: 0,
   currentPlayer: 0,
+  buyInAmount: 1000, // Default buy-in amount
 }
 
 export const riverThreePlayersLastBet: GameState = {
@@ -287,6 +300,7 @@ export const riverThreePlayersLastBet: GameState = {
   bigBlind: 50,
   dealerPosition: 0,
   currentPlayer: 2,
+  buyInAmount: 1000, // Default buy-in amount
 }
 
 // 6. SHOWDOWN states
@@ -304,6 +318,7 @@ export const showdownTwoPlayers: GameState = {
   bigBlind: 50,
   dealerPosition: 0,
   currentPlayer: 0,
+  buyInAmount: 1000, // Default buy-in amount
 }
 
 export const showdownMultiplePlayersWithSidePots: GameState = {
@@ -327,6 +342,7 @@ export const showdownMultiplePlayersWithSidePots: GameState = {
   bigBlind: 50,
   dealerPosition: 0,
   currentPlayer: 0,
+  buyInAmount: 1000, // Default buy-in amount
 }
 
 // 7. GAME_OVER states
@@ -348,6 +364,7 @@ export const gameOverWinner: GameState = {
   bigBlind: 50,
   dealerPosition: 0,
   currentPlayer: 0,
+  buyInAmount: 1000, // Default buy-in amount
 }
 
 export const gameOverMultipleWinners: GameState = {
@@ -371,6 +388,7 @@ export const gameOverMultipleWinners: GameState = {
   bigBlind: 50,
   dealerPosition: 0,
   currentPlayer: 0,
+  buyInAmount: 1000, // Default buy-in amount
 }
 
 // Special scenarios
@@ -388,6 +406,7 @@ export const eightPlayersFullTable: GameState = {
   bigBlind: 50,
   dealerPosition: 0,
   currentPlayer: 3,
+  buyInAmount: 1000, // Default buy-in amount
 }
 
 export const lowStacksEndGame: GameState = {
@@ -411,6 +430,7 @@ export const lowStacksEndGame: GameState = {
   bigBlind: 50,
   dealerPosition: 0,
   currentPlayer: 0,
+  buyInAmount: 1000, // Default buy-in amount
 }
 
 // Export all mock states for easy access
