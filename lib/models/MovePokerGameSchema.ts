@@ -11,6 +11,13 @@ export enum PokerGameState {
   GAME_OVER = 7,
 }
 
+const PokerCardSchema = z.object({
+  fields: z.object({
+    suit: z.coerce.number(),
+    value: z.coerce.number(),
+  }),
+})
+
 export const MovePokerGameSchema = z.object({
   big_blind: z.coerce.number(),
   buy_in: z.coerce.number(),
@@ -18,7 +25,7 @@ export const MovePokerGameSchema = z.object({
   current_bet: z.coerce.number(),
   current_player: z.coerce.number(),
   dealer_position: z.coerce.number(),
-  deck: z.array(z.string()),
+  deck: z.array(PokerCardSchema),
   id: z.object({ id: z.string() }),
   last_raise_position: z.coerce.number(),
   min_bet: z.coerce.number(),
@@ -28,7 +35,7 @@ export const MovePokerGameSchema = z.object({
       fields: z.object({
         addr: z.string(),
         balance: z.coerce.number(),
-        cards: z.array(z.any()), // TODO: Define card schema
+        cards: z.array(PokerCardSchema),
         current_bet: z.coerce.number(),
         is_all_in: z.boolean(),
         is_folded: z.boolean(),

@@ -5,6 +5,7 @@ import Haikunator from 'haikunator'
 import { MovePokerGameSchema } from '../models/MovePokerGameSchema'
 import { GameState } from '../models/GameState'
 import { Player } from '../models/Player'
+import { cardNameFromSuitAndValue } from '~/assets/cards'
 
 export async function getGameInfo(gameAddress: string, client: SuiClient) {
   const { data, error } = await client.getObject({
@@ -23,10 +24,21 @@ export const useGameInfoQuery = (gameAddress?: string) =>
     { id: gameAddress!, options: { showContent: true, showType: true } },
     {
       enabled: !!gameAddress,
+      refetchInterval: 1000, // Adjust as needed for real-time updates
       select({ data }) {
         const content = data?.content
         if (!content || content.dataType !== 'moveObject') return
-        return parseState(MovePokerGameSchema.parse(content.fields))
+        const pased = MovePokerGameSchema.safeParse(content.fields)
+        if (!pased.success) {
+          console.error('Failed to parse game state:', pased.error)
+          return undefined
+        }
+        try {
+          return parseState(pased.data)
+        } catch (error) {
+          console.error('Error parsing game state:', error)
+          return undefined
+        }
       },
     }
   )
@@ -52,7 +64,10 @@ function parseState(data: MovePokerGameSchema): GameState {
           id: p.addr,
           name: new Haikunator({ seed: p.addr }).haikunate(),
           chips: p.balance,
-          cards: p.cards,
+          cards: p.cards.map(card => {
+            const { suit, value } = card.fields
+            return cardNameFromSuitAndValue(suit, value)
+          }),
           isFolded: p.is_folded,
           isActive: p.is_folded || p.is_all_in, // TODO: Determine active status based on game state
           currentBet: p.current_bet,
