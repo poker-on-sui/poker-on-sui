@@ -269,7 +269,7 @@ const PlayerBlock: React.FC<PlayerAvatarProps> = ({
             }}
             whileHover={{ scale: 1.1 }}
           >
-            ${player.currentBet}
+            {formatMist(player.currentBet)}
           </motion.div>
         )}
       </motion.div>
