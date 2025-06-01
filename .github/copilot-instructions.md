@@ -26,3 +26,5 @@ a SUI blockchain smart contract. The game supports 2-10 players in a session.
 
 - No need to test the implementation using dev server, just ensure the code is build successfully.
 - Use components from `@shadcn/ui` for UI elements whenever possible
+- Use `motion/react` for animations between component state whenever possible
+- use `AnimatePresence` from `motion/react` to handle component unmounting animations

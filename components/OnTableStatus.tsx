@@ -10,6 +10,8 @@ import { cn } from '~/lib/utils'
 interface Props {
   readonly game?: GameState
   loading?: boolean
+  /** Current connected wallet address */
+  address?: string
 }
 
 // Helper function to get phase-specific styling

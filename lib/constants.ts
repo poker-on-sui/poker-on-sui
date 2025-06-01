@@ -25,11 +25,11 @@ export const PLAYERS_POSITION_MAPS = [
  * The positions are in percentage coordinates relative to the table size.
  */
 export const COMMUNITY_CARDS_POSITION_MAPS = [
-  [39.18, 19.757],
-  [44.285, 19.757],
-  [49.317, 19.757],
-  [54.277, 19.757],
   [59.454, 19.757],
+  [54.277, 19.757],
+  [49.317, 19.757],
+  [44.285, 19.757],
+  [39.18, 19.757],
 ] as const
 
 /**

@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { useGameActions } from '~/lib/hooks/useGameActions'
@@ -8,12 +8,53 @@ import { GameState } from '~/lib/models/GameState'
 interface Props {
   readonly game?: GameState
   readonly loading?: boolean
+  /** Current connected wallet address */
+  readonly address?: string
 }
 
-export default function GameControls({ game, loading }: Props) {
+export default function GameControls({ game, loading, address }: Props) {
   const [raiseAmount, setRaiseAmount] = useState(0)
   const [customBetAmount, setCustomBetAmount] = useState('')
   const actions = useGameActions(game?.id)
+
+  const currentPlayer = !game ? undefined : game.players[game.currentPlayer]
+  const isMyTurn = !currentPlayer ? false : currentPlayer.id === address
+  const callAmount = !game
+    ? 0
+    : game.currentBet - (currentPlayer?.currentBet || 0)
+  const minRaise = !game
+    ? 0
+    : game.currentBet > 0
+    ? game.currentBet * 2
+    : game.bigBlind
+  const maxRaise = currentPlayer?.chips || 0
+
+  // Debugging information
+  useEffect(() => {
+    console.log('Current Game:', game)
+    console.log('Current Player:', currentPlayer)
+    console.log('My Address:', address)
+    console.log('Is My Turn:', isMyTurn)
+    console.log('Call Amount:', callAmount)
+    console.log('Min Raise:', minRaise)
+    console.log('Max Raise:', maxRaise)
+    console.log('Raise Amount:', raiseAmount)
+    console.log('Custom Bet Amount:', customBetAmount)
+  }, [
+    game,
+    address,
+    currentPlayer,
+    isMyTurn,
+    callAmount,
+    minRaise,
+    maxRaise,
+    raiseAmount,
+    customBetAmount,
+    actions.fold,
+    actions.call,
+    actions.raise,
+    loading,
+  ])
 
   if (loading) {
     return (
@@ -39,11 +80,11 @@ export default function GameControls({ game, loading }: Props) {
     )
   }
 
-  const currentPlayer = game.players[game.currentPlayer]
-  const isMyTurn = currentPlayer?.isActive && !currentPlayer?.isFolded
-  const callAmount = game.currentBet - (currentPlayer?.currentBet || 0)
-  const minRaise = game.currentBet > 0 ? game.currentBet * 2 : game.bigBlind
-  const maxRaise = currentPlayer?.chips || 0
+  // useEffect(() => {
+  //   if (game) {
+  //     console.log('Game State:', game)
+  //   }
+  // }, [game])
 
   const handleRaise = () => {
     const amount = raiseAmount || parseInt(customBetAmount) || minRaise
