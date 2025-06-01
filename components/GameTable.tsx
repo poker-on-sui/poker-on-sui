@@ -23,7 +23,7 @@ interface Props {
 export default function GameTable({}: Props) {
   const [account] = useAccounts()
   // const { game, isLoading } = useGameTable(gameAddress)
-  const game = mocks.flopTwoPlayers
+  const game = mocks.gameOverMultipleWinners
   const isLoading = false // Simulating loading state for the example
 
   return (

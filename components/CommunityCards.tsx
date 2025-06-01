@@ -11,7 +11,7 @@ export function CommunityCards({ cards }: Props) {
   const communityCards = cards || []
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence>
       {[0, 1, 2, 3, 4].map(i => {
         const card = communityCards[i] || 'hidden'
         const [x, y] = COMMUNITY_CARDS_POSITION_MAPS[i]

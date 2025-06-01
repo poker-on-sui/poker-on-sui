@@ -1,78 +1,54 @@
-import { useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit'
+import {
+  useAccounts,
+  useSignAndExecuteTransaction,
+  useSuiClient,
+} from '@mysten/dapp-kit'
 import { Transaction } from '@mysten/sui/transactions'
 import { useCallback, useState } from 'react'
 import { useNetworkVariable } from '~/lib/networkConfig'
 import { getDictionary } from '~/lib/dictionaries'
+import { getGameInfo } from '../queries/getGameInfo'
+import { ok, failed, Result } from '~/lib/result'
+import { useRouter } from 'next/navigation'
 
 const dict = getDictionary()
 
-// Action constants from smart contract
-enum PlayerAction {
-  FOLD = 0,
-  CHECK = 1,
-  CALL = 2,
-  BET = 3,
-  RAISE = 4,
-}
-
-export interface GameActionResult {
-  success: boolean
-  error?: string
-  transactionDigest?: string
-}
-
-export function useGameActions(addr?: string): {
-  createGame: (buyIn: number) => Promise<GameActionResult>
-  joinGame: (payment: number) => Promise<GameActionResult>
-  startGame: () => Promise<GameActionResult>
-  fold: () => Promise<GameActionResult>
-  check: () => Promise<GameActionResult>
-  call: () => Promise<GameActionResult>
-  bet: (amount: number) => Promise<GameActionResult>
-  raise: (amount: number) => Promise<GameActionResult>
-  isLoading: boolean
-} {
+export function useGameActions() {
+  const [account] = useAccounts()
   const suiClient = useSuiClient()
-  const { mutateAsync: signAndExecuteTransaction } =
-    useSignAndExecuteTransaction({
-      execute: async ({ bytes, signature }) =>
-        await suiClient.executeTransactionBlock({
-          transactionBlock: bytes,
-          signature,
-          options: { showRawEffects: true, showObjectChanges: true },
-        }),
-    })
-
+  const { mutateAsync } = useSignAndExecuteTransaction({
+    execute: async ({ bytes, signature }) =>
+      await suiClient.executeTransactionBlock({
+        transactionBlock: bytes,
+        signature,
+        options: { showRawEffects: true, showObjectChanges: true },
+      }),
+  })
   const pokerPackageId = useNetworkVariable('pokerPackageId')
   const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
 
   const executeTransaction = useCallback(
-    async (transaction: Transaction): Promise<GameActionResult> => {
+    async (transaction: Transaction) => {
       setIsLoading(true)
       try {
-        const result = await signAndExecuteTransaction({ transaction })
+        const result = await mutateAsync({ transaction })
         console.log('Transaction executed:', result)
-
-        return {
-          success: true,
-          transactionDigest: result.digest,
-        }
+        return ok(result.objectChanges ?? [])
       } catch (error) {
         console.error('Transaction error:', error)
-        return {
-          success: false,
-          error:
-            error instanceof Error ? error.message : 'Unknown error occurred',
-        }
+        return failed(
+          error instanceof Error ? error.message : 'Unknown error occurred'
+        )
       } finally {
         setIsLoading(false)
       }
     },
-    [signAndExecuteTransaction]
+    [mutateAsync]
   )
 
   const createGame = useCallback(
-    async (buyIn: number): Promise<GameActionResult> => {
+    async (buyIn: number) => {
       try {
         const transaction = new Transaction()
 
@@ -84,147 +60,96 @@ export function useGameActions(addr?: string): {
           arguments: [transaction.pure.u64(buyInMist)],
         })
 
-        return await executeTransaction(transaction)
+        const result = await executeTransaction(transaction)
+        if (result.ok) {
+          const createdObject = result.data
+            .filter(obj => obj.type === 'created')
+            .pop()
+          if (!createdObject) return failed('No object was created!')
+          const gameAddress = createdObject.objectId
+          console.log('Game created successfully:', gameAddress)
+          return ok(gameAddress)
+        }
+        return failed('Failed to create game. Transaction failed!')
       } catch (error) {
         console.error('Create game error:', error)
-        return {
-          success: false,
-          error:
-            error instanceof Error ? error.message : 'Failed to create game',
-        }
+        return failed(
+          error instanceof Error ? error.message : 'Failed to create game'
+        )
       }
     },
     [pokerPackageId, executeTransaction]
   )
 
   const joinGame = useCallback(
-    async (payment: number): Promise<GameActionResult> => {
-      if (!addr) {
-        return {
-          success: false,
-          error: dict.errors.missingGameAddress,
-        }
+    async (gameAddr: string): Promise<Result> => {
+      if (!gameAddr) return failed(dict.errors.missingGameAddress)
+      if (!account) return failed(dict.errors.walletNotConnected)
+
+      const game = await getGameInfo(gameAddr, suiClient)
+      if (!game) return failed(dict.errors.gameNotFound)
+
+      if (game.players.some(p => p.fields.addr === account.address)) {
+        console.log('Already joined, redirecting to game')
+        router.push(`/game?addr=${gameAddr}`)
+        return ok()
       }
 
       try {
-        const transaction = new Transaction()
-
-        // Convert payment to MIST
-        const paymentMist = Math.floor(payment * 1_000_000_000)
-
-        // Split coins for payment
-        const [coin] = transaction.splitCoins(transaction.gas, [paymentMist])
-
-        transaction.moveCall({
+        const tx = new Transaction()
+        const paymentMist = Math.floor(game.buy_in)
+        const [coin] = tx.splitCoins(tx.gas, [paymentMist])
+        tx.moveCall({
           target: `${pokerPackageId}::game::join_game`,
-          arguments: [transaction.object(addr), coin],
+          arguments: [tx.object(gameAddr), coin],
         })
 
-        return await executeTransaction(transaction)
+        const result = await executeTransaction(tx)
+        if (!result.ok) return result
+
+        console.log('Joined game successfully:', gameAddr)
+        router.push(`/game?addr=${gameAddr}`)
+        return ok()
       } catch (error) {
         console.error('Join game error:', error)
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Failed to join game',
-        }
+        return failed(
+          error instanceof Error ? error.message : 'Failed to join game'
+        )
       }
     },
-    [addr, pokerPackageId, executeTransaction]
+    [account, suiClient, router, pokerPackageId, executeTransaction]
   )
 
-  const startGame = useCallback(async (): Promise<GameActionResult> => {
-    if (!addr) {
-      return {
-        success: false,
-        error: dict.errors.missingGameAddress,
-      }
-    }
-
-    try {
-      const transaction = new Transaction()
-
-      transaction.moveCall({
-        target: `${pokerPackageId}::game::start_game`,
-        arguments: [
-          transaction.object(addr),
-          transaction.object('0x8'), // Random object ID
-        ],
-      })
-
-      return await executeTransaction(transaction)
-    } catch (error) {
-      console.error('Start game error:', error)
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to start game',
-      }
-    }
-  }, [addr, pokerPackageId, executeTransaction])
-
-  const playerAction = useCallback(
-    async (
-      action: PlayerAction,
-      amount: number = 0
-    ): Promise<GameActionResult> => {
-      if (!addr) {
-        return {
-          success: false,
-          error: dict.errors.missingGameAddress,
-        }
-      }
+  const startGame = useCallback(
+    async (gameAddr: string): Promise<Result> => {
+      if (!gameAddr) return failed(dict.errors.missingGameAddress)
 
       try {
-        const transaction = new Transaction()
-
-        // Convert amount to MIST for bet/raise actions
-        const amountMist = Math.floor(amount * 1_000_000_000)
-
-        transaction.moveCall({
-          target: `${pokerPackageId}::game::player_action`,
-          arguments: [
-            transaction.object(addr),
-            transaction.pure.u8(action),
-            transaction.pure.u64(amountMist),
-          ],
+        const tx = new Transaction()
+        tx.moveCall({
+          target: `${pokerPackageId}::game::start_game`,
+          arguments: [tx.object(gameAddr), tx.object.random()],
         })
 
-        return await executeTransaction(transaction)
+        const result = await executeTransaction(tx)
+        if (!result.ok) return failed(result.error)
+        return ok()
       } catch (error) {
-        console.error('Player action error:', error)
-        return {
-          success: false,
-          error:
-            error instanceof Error ? error.message : 'Failed to execute action',
-        }
+        console.error('Start game error:', error)
+        return failed(
+          error instanceof Error ? error.message : 'Failed to start game'
+        )
       }
     },
-    [addr, pokerPackageId, executeTransaction]
+    [pokerPackageId, executeTransaction]
   )
 
-  const fold = useCallback(
-    () => playerAction(PlayerAction.FOLD),
-    [playerAction]
-  )
-
-  const check = useCallback(
-    () => playerAction(PlayerAction.CHECK),
-    [playerAction]
-  )
-
-  const call = useCallback(
-    () => playerAction(PlayerAction.CALL),
-    [playerAction]
-  )
-
-  const bet = useCallback(
-    (amount: number) => playerAction(PlayerAction.BET, amount),
-    [playerAction]
-  )
-
-  const raise = useCallback(
-    (amount: number) => playerAction(PlayerAction.RAISE, amount),
-    [playerAction]
-  )
+  // TODO: Implement fold, check, call, bet, raise actions
+  const fold = useCallback(() => {}, [])
+  const check = useCallback(() => {}, [])
+  const call = useCallback(() => {}, [])
+  const bet = useCallback((amount: number) => {}, [])
+  const raise = useCallback((amount: number) => {}, [])
 
   return {
     createGame,

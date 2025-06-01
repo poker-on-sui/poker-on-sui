@@ -1,11 +1,10 @@
-import { useState } from 'react'
-import { useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit'
+import { useCallback, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 import { useNetworkVariable } from '../networkConfig'
 import { en } from '../dictionaries'
 import { isValidSuiAddress } from '../utils'
-import { Transaction } from '@mysten/sui/transactions'
+import { useGameActions } from './useGameActions'
 
 export function useGameLobby() {
   return {
@@ -19,76 +18,56 @@ const defaultGameConfig = {
 }
 
 function useHostGame() {
+  const { createGame } = useGameActions()
+  const [createError, setCreateError] = useState('')
   const pokerPackageId = useNetworkVariable('pokerPackageId')
-  const suiClient = useSuiClient()
   const router = useRouter()
-  const { mutateAsync } = useSignAndExecuteTransaction({
-    execute: async ({ bytes, signature }) =>
-      await suiClient.executeTransactionBlock({
-        transactionBlock: bytes,
-        signature,
-        options: {
-          // Raw effects are required so the effects can be reported back to the wallet
-          showRawEffects: true,
-          // Select additional data to return
-          showObjectChanges: true,
-        },
-      }),
-  })
 
-  const createGame = async (): Promise<void> => {
-    const tx = new Transaction()
-    tx.moveCall({
-      target: `${pokerPackageId}::game::create_game`,
-      arguments: [tx.pure.u64(defaultGameConfig.buy_in)],
-    })
-    const { objectChanges } = await mutateAsync({ transaction: tx })
-    if (!objectChanges || objectChanges.length === 0) {
-      console.error('Failed to create game: No object changed!')
+  const handleCreateGame = useCallback(async () => {
+    if (!pokerPackageId) {
+      console.error('Poker package ID is not set in network config')
       return
     }
-
-    console.log('Game created, objectChanges:', objectChanges)
-    const createdObjectId = objectChanges
-      ?.map(
-        o =>
-          o.type === 'created' &&
-          o.objectType === `${pokerPackageId}::game::PokerGame` &&
-          o.objectId
-      )
-      .filter(Boolean)[0]
-
-    if (!createdObjectId) {
-      console.error('Failed to create game: No Game ID found')
-      return
+    const result = await createGame(defaultGameConfig.buy_in)
+    if (result.ok) {
+      console.log('Game created successfully:', result.data)
+      router.push(`/game?addr=${result.data}`)
+    } else {
+      setCreateError(result.error)
     }
-    console.log('Game created with ID:', createdObjectId)
+  }, [createGame, pokerPackageId, router])
 
-    router.push(`/game/?addr=${createdObjectId}`)
-  }
-
-  return { createGame }
+  return { handleCreateGame, createError }
 }
-
 export function useJoinGame() {
   const [gameAddress, setGameAddress] = useState('')
-  const [addressError, setAddressError] = useState('')
+  const [joinError, setJoinError] = useState('')
+  const { joinGame } = useGameActions()
+
   const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const address = e.target.value.trim()
     setGameAddress(address)
-    if (isValidSuiAddress(address)) {
-      setAddressError('')
-    } else {
-      setAddressError(en.lobby.invalidSuiAddress)
-    }
+    if (isValidSuiAddress(address)) setJoinError('')
+    else setJoinError(en.lobby.invalidSuiAddress)
   }
   // const suiClient = useSuiClient()
   // const { mutateAsync } = useSignAndExecuteTransaction()
 
-  const joinGame = (): void => {
+  const handleJoinGame = useCallback(async (): Promise<void> => {
     console.log('Joining game at address:', gameAddress)
-    // WIP
-  }
+    const result = await joinGame(gameAddress)
+    if (result.ok) {
+      console.log('Successfully joined game:', result.data)
+    } else {
+      console.error('Failed to join game:', result.error)
+      setJoinError(result.error)
+    }
+  }, [gameAddress, joinGame])
 
-  return { joinGame, gameAddress, addressError, handleAddressChange }
+  return {
+    handleJoinGame,
+    gameAddress,
+    joinError,
+    handleAddressChange,
+  }
 }

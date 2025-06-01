@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { useSuiClientInfiniteQuery, useSuiClientQuery } from '@mysten/dapp-kit'
+import { useSuiClientInfiniteQuery } from '@mysten/dapp-kit'
 import { GameState } from '../models/GameState'
-import { MovePokerGameSchema } from '../models/MovePokerGameSchema'
+import { useGameInfoQuery } from '../queries/getGameInfo'
 
 export function useGameTable(addr?: string) {
   const { game, isLoading } = useCurrentGame(addr)
@@ -12,18 +12,7 @@ export function useGameTable(addr?: string) {
 
 function useCurrentGame(addr: string | undefined) {
   const [game, setGame] = useState<GameState | undefined>()
-  const { data, isSuccess, isError, isLoading, error } = useSuiClientQuery(
-    'getObject',
-    { id: addr!, options: { showContent: true } },
-    {
-      enabled: !!addr,
-      select(data) {
-        const content = data.data?.content
-        if (!content || content.dataType !== 'moveObject') return
-        return MovePokerGameSchema.parse(content.fields)
-      },
-    }
-  )
+  const { data, isSuccess, isError, isLoading, error } = useGameInfoQuery(addr)
 
   useEffect(() => {
     if (isSuccess && data) {

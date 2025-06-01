@@ -23,7 +23,19 @@ export const MovePokerGameSchema = z.object({
   last_raise_position: z.coerce.number(),
   min_bet: z.coerce.number(),
   owner: z.string(),
-  players: z.array(z.object({ id: z.string() })),
+  players: z.array(
+    z.object({
+      fields: z.object({
+        addr: z.string(),
+        balance: z.coerce.number(),
+        cards: z.array(z.any()), // TODO: Define card schema
+        current_bet: z.coerce.number(),
+        is_all_in: z.boolean(),
+        is_folded: z.boolean(),
+        total_contributed: z.coerce.number(),
+      }),
+    })
+  ),
   pot: z.coerce.number(),
   small_blind: z.coerce.number(),
   state: z.nativeEnum(PokerGameState),
